@@ -1,155 +1,79 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'auth_service.dart';
+import 'package:intl/intl.dart';
 
 class DonationService {
   static final DonationService _instance = DonationService._internal();
   factory DonationService() => _instance;
   DonationService._internal();
 
-  static const String baseUrl = 'http://localhost:9001/api';
-  final AuthService _authService = AuthService();
+  // Static list to store donations in memory
+  static List<Map<String, dynamic>> _donations = [
+    {
+      'bookName': 'Dune',
+      'author': 'Frank Herbert',
+      'donor': 'Hazaro Utah',
+      'date': '20/7/2025',
+      'category': 'Science Fiction',
+      'status': 'समीक्षा में',
+    },
+    {
+      'bookName': 'My Neighbour Kiki',
+      'author': 'Miyazaki',
+      'donor': 'Sobhagya Raj Dev',
+      'date': '20/7/2025',
+      'category': 'Fiction',
+      'status': 'समीक्षा में',
+    },
+  ];
 
-  Future<List<Map<String, dynamic>>> getAllDonations() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/donations'),
-        headers: _authService.authHeaders,
-      );
-
-      print('=== DONATION API RESPONSE ===');
-      print('Status: ${response.statusCode}');
-      print('Body: ${response.body}');
-      print('============================');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          final List<dynamic> donationsJson = data['data'];
-          
-          List<Map<String, dynamic>> donations = donationsJson.map((donation) {
-            return {
-              'id': donation['id']?.toString() ?? '',
-              'donationId': donation['donationId'] ?? '',
-              'bookName': donation['bookTitle'] ?? '',
-              'author': donation['bookAuthor'] ?? '',
-              'donor': donation['donor']?['name'] ?? 'Unknown',
-              'donorEmail': donation['donor']?['email'] ?? '',
-              'date': _formatDate(donation['createdAt']),
-              'category': donation['bookGenre'] ?? 'General',
-              'status': _getStatusInHindi(donation['status']),
-              'condition': donation['bookCondition'] ?? 'Good',
-              'isbn': donation['bookIsbn'] ?? '',
-              'description': donation['bookDescription'] ?? '',
-              'language': donation['bookLanguage'] ?? 'Hindi',
-            };
-          }).toList();
-
-          print('=== PROCESSED DONATIONS ===');
-          print('Count: ${donations.length}');
-          for (var d in donations) {
-            print('Book: ${d['bookName']} by ${d['author']} - Status: ${d['status']}');
-          }
-          print('===========================');
-          
-          return donations;
-        }
-      }
-      
-      print('API call failed, returning empty list');
-      return [];
-    } catch (e) {
-      print('Error getting donations: $e');
-      return [];
-    }
-  }
-
-  // Legacy method for compatibility
+  // Get all donations
   List<Map<String, dynamic>> getDonations() {
-    return [];
+    return List.from(_donations);
   }
 
-  Future<bool> createDonation({
-    required String bookTitle,
-    required String bookAuthor,
-    required String bookGenre,
-    required String bookCondition,
-    String? bookIsbn,
-    String? bookDescription,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/donations'),
-        headers: _authService.authHeaders,
-        body: json.encode({
-          'donorId': 1, // Default user ID
-          'bookTitle': bookTitle,
-          'bookAuthor': bookAuthor,
-          'bookGenre': bookGenre,
-          'bookCondition': bookCondition,
-          'bookIsbn': bookIsbn,
-          'bookDescription': bookDescription,
-          'bookLanguage': 'Hindi',
-        }),
-      );
-
-      print('=== CREATE DONATION RESPONSE ===');
-      print('Status: ${response.statusCode}');
-      print('Body: ${response.body}');
-      print('===============================');
-
-      return response.statusCode == 201;
-    } catch (e) {
-      print('Error creating donation: $e');
-      return false;
-    }
-  }
-
-  Future<Map<String, int>> getDonationStatistics() async {
-    try {
-      final donations = await getAllDonations();
-      
-      final total = donations.length;
-      final approved = donations.where((d) => d['status'] == 'स्वीकृत').length;
-      final pending = donations.where((d) => d['status'] == 'लंबित').length;
-
-      return {
-        'total': total,
-        'approved': approved,
-        'pending': pending,
-      };
-    } catch (e) {
-      print('Error getting statistics: $e');
-      return {'total': 0, 'approved': 0, 'pending': 0};
-    }
-  }
-
-  // Legacy methods for compatibility
-  void addDonation({required String bookName, required String author, required String donorName, required String category, String status = 'समीक्षा में'}) {}
-  void removeDonation(int index) {}
-  int getTotalDonations() => 0;
-  int getPendingDonations() => 0;
-  int getApprovedDonations() => 0;
-  int getUniqueDonors() => 0;
-
-  String _formatDate(String? dateString) {
-    if (dateString == null) return '';
-    try {
-      final date = DateTime.parse(dateString);
-      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-    } catch (e) {
-      return '';
-    }
-  }
-
-  String _getStatusInHindi(String? status) {
-    const statusMap = {
-      'PENDING': 'लंबित',
-      'UNDER_REVIEW': 'समीक्षा में',
-      'APPROVED': 'स्वीकृत',
-      'REJECTED': 'अस्वीकृत',
-      'ADDED_TO_LIBRARY': 'पुस्तकालय में जोड़ा गया'
+  // Add new donation
+  void addDonation({
+    required String bookName,
+    required String author,
+    required String donorName,
+    required String category,
+    String status = 'समीक्षा में',
+  }) {
+    final newDonation = {
+      'bookName': bookName,
+      'author': author,
+      'donor': donorName,
+      'date': DateFormat('dd/MM/yyyy').format(DateTime.now()),
+      'category': category,
+      'status': status,
     };
-    return statusMap[status] ?? status ?? 'अज्ञात';
+    
+    _donations.add(newDonation);
+  }
+
+  // Remove donation
+  void removeDonation(int index) {
+    if (index >= 0 && index < _donations.length) {
+      _donations.removeAt(index);
+    }
+  }
+
+  // Get donation count
+  int getTotalDonations() {
+    return _donations.length;
+  }
+
+  // Get pending donations count
+  int getPendingDonations() {
+    return _donations.where((d) => d['status'] == 'समीक्षा में').length;
+  }
+
+  // Get approved donations count
+  int getApprovedDonations() {
+    return _donations.where((d) => d['status'] == 'स्वीकृत').length;
+  }
+
+  // Get unique donors count
+  int getUniqueDonors() {
+    return _donations.map((d) => d['donor']).toSet().length;
   }
 }

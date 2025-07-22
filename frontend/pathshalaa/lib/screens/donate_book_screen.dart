@@ -82,67 +82,46 @@ class _DonateBookScreenState extends State<DonateBookScreen> {
         _isLoading = true;
       });
 
-      try {
-        final donationService = DonationService();
-        final success = await donationService.createDonation(
-          bookTitle: _bookNameController.text.trim(),
-          bookAuthor: _authorNameController.text.trim(),
-          bookGenre: _selectedCategory,
-          bookCondition: _selectedCondition,
-          bookIsbn: _isbnController.text.trim().isNotEmpty ? _isbnController.text.trim() : null,
-          bookDescription: 'Donated by ${_donorNameController.text.trim()}',
+      // Simulate API call
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Add donation to service
+      final donationService = DonationService();
+      donationService.addDonation(
+        bookName: _bookNameController.text.trim(),
+        author: _authorNameController.text.trim(),
+        donorName: _donorNameController.text.trim(),
+        category: _selectedCategory,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('पुस्तक दान सफलतापूर्वक सबमिट हो गई'),
+            backgroundColor: Colors.green,
+          ),
         );
 
+        // Navigate to dashboard
+        Navigator.pushReplacementNamed(context, '/dashboard');
+
+        // Clear form
+        _formKey.currentState!.reset();
+        _donorNameController.clear();
+        _mobileController.clear();
+        _bookNameController.clear();
+        _authorNameController.clear();
+        _isbnController.clear();
         setState(() {
-          _isLoading = false;
+          _selectedImage = null;
+          _imageBytes = null;
+          _selectedCategory = 'Fiction';
+          _selectedCondition = 'New';
         });
-
-        if (mounted) {
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('पुस्तक दान सफलतापूर्वक सबमिट हो गई'),
-                backgroundColor: Colors.green,
-              ),
-            );
-
-            // Navigate to dashboard
-            Navigator.pushReplacementNamed(context, '/dashboard');
-
-            // Clear form
-            _formKey.currentState!.reset();
-            _donorNameController.clear();
-            _mobileController.clear();
-            _bookNameController.clear();
-            _authorNameController.clear();
-            _isbnController.clear();
-            setState(() {
-              _selectedImage = null;
-              _imageBytes = null;
-              _selectedCategory = 'Fiction';
-              _selectedCondition = 'New';
-            });
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('पुस्तक दान में त्रुटि हुई'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('त्रुटि: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
       }
     }
   }

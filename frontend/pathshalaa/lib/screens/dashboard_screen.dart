@@ -13,39 +13,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
   final DonationService _donationService = DonationService();
   
-  List<Map<String, dynamic>> _donations = [];
-  Map<String, int> _statistics = {'total': 0, 'approved': 0, 'pending': 0};
-  bool _isLoading = true;
+  // Get dynamic donations list
+  List<Map<String, dynamic>> get recentDonations => _donationService.getDonations();
 
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    
-    try {
-      final donations = await _donationService.getAllDonations();
-      final statistics = await _donationService.getDonationStatistics();
-      
-      setState(() {
-        _donations = donations;
-        _statistics = statistics;
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Dashboard load error: $e');
-      setState(() => _isLoading = false);
-    }
+    // Refresh the state when returning to dashboard
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
   }
 
   void _onItemTapped(int index) {
     if (index == 1) {
-      Navigator.pushNamed(context, '/donate').then((_) => _loadData());
+      // Navigate to donate book screen and refresh when returning
+      Navigator.pushNamed(context, '/donate').then((_) {
+        // Refresh the data when returning from donation screen
+        setState(() {});
+      });
     } else {
-      setState(() => _selectedIndex = index);
+      setState(() {
+        _selectedIndex = index;
+      });
     }
   }
 
@@ -74,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.auto_stories,
-                    value: '${_statistics['total'] ?? 0}',
+                    value: '${_donationService.getTotalDonations()}',
                     label: 'कुल\nपुस्तकें',
                     iconColor: const Color(0xFF2196F3),
                   ),
@@ -83,7 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.check_circle,
-                    value: '${_statistics['approved'] ?? 0}',
+                    value: '${_donationService.getApprovedDonations()}',
                     label: 'स्वीकृत\nपुस्तकें',
                     iconColor: const Color(0xFF4CAF50),
                   ),
@@ -92,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.access_time,
-                    value: '${_statistics['pending'] ?? 0}',
+                    value: '${_donationService.getPendingDonations()}',
                     label: 'लंबित\nपुस्तकें',
                     iconColor: const Color(0xFFFF9800),
                   ),
@@ -101,7 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.group,
-                    value: '${_donations.map((d) => d['donor']).toSet().length}',
+                    value: '${_donationService.getUniqueDonors()}',
                     label: 'कुल दाता',
                     iconColor: const Color(0xFF9C27B0),
                   ),
@@ -202,56 +192,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'दान सूची',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A1A),
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed: () => _showAllDonations(),
-                        icon: const Icon(Icons.list, size: 16),
-                        label: const Text('सभी देखें'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Color(0xFF2196F3),
-                        ),
-                      ),
-                    ],
+                  const Text(
+                    'दान सूची',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A1A1A),
+                    ),
                   ),
 
                   const SizedBox(height: 20),
 
                   // Donation Items
-                  if (_isLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (_donations.isEmpty)
-                    const Center(child: Text('कोई दान रिकॉर्ड नहीं मिला'))
-                  else
-                    ..._donations.take(3).toList().asMap().entries.map(
-                      (entry) {
-                        int index = entry.key;
-                        Map<String, dynamic> donation = entry.value;
-                        return Column(
-                          children: [
-                            _buildDonationItem(
-                              index: index,
-                              bookName: donation['bookName'],
-                              author: donation['author'],
-                              donor: donation['donor'],
-                              date: donation['date'],
-                              category: donation['category'],
-                              status: donation['status'],
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-                        );
-                      },
-                    ),
+                  ...recentDonations.asMap().entries.map(
+                    (entry) {
+                      int index = entry.key;
+                      Map<String, dynamic> donation = entry.value;
+                      return Column(
+                        children: [
+                          _buildDonationItem(
+                            index: index,
+                            bookName: donation['bookName'],
+                            author: donation['author'],
+                            donor: donation['donor'],
+                            date: donation['date'],
+                            category: donation['category'],
+                            status: donation['status'],
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -486,61 +458,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         );
       },
-    );
-  }
-
-  void _showAllDonations() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          height: MediaQuery.of(context).size.height * 0.8,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('सभी दान रिकॉर्ड', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-                ],
-              ),
-              const Divider(),
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _donations.isEmpty
-                        ? const Center(child: Text('कोई दान रिकॉर्ड नहीं मिला'))
-                        : ListView.builder(
-                            itemCount: _donations.length,
-                            itemBuilder: (context, index) {
-                              final d = _donations[index];
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(d['bookName'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                      Text('लेखक: ${d['author']}'),
-                                      Text('दाता: ${d['donor']}'),
-                                      Text('श्रेणी: ${d['category']}'),
-                                      Text('दिनांक: ${d['date']}'),
-                                      Text('स्थिति: ${d['status']}'),
-                                      if (d['description']?.isNotEmpty == true) Text('विवरण: ${d['description']}'),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
