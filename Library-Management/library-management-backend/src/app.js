@@ -16,7 +16,12 @@ const env = require('./config/env');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:8080'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -48,6 +53,15 @@ if (useInMemoryDb) {
             process.exit(1); // Exit with error
         });
 }
+
+// Simple test route
+app.get('/api/test', (req, res) => {
+    res.json({ 
+        success: true, 
+        message: 'API is working!', 
+        timestamp: new Date().toISOString() 
+    });
+});
 
 // Routes
 app.use('/api/admin', adminRoutes);

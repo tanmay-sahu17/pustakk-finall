@@ -11,18 +11,32 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
   final DonationService _donationService = DonationService();
-
-  // Get dynamic donations list
-  List<Map<String, dynamic>> get recentDonations =>
-      _donationService.getDonations();
+  List<Map<String, dynamic>> _donations = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Refresh the state when returning to dashboard
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {});
+    _loadDonations();
+  }
+
+  Future<void> _loadDonations() async {
+    setState(() {
+      _isLoading = true;
     });
+
+    // Test API connection first
+    await _donationService.testApiConnection();
+    
+    // Load donations from API
+    final donations = await _donationService.getDonationsAsync();
+    
+    if (mounted) {
+      setState(() {
+        _donations = donations;
+        _isLoading = false;
+      });
+    }
   }
 
   void _onItemTapped(int index) {
@@ -30,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Navigate to donate book screen and refresh when returning
       Navigator.pushNamed(context, '/donate').then((_) {
         // Refresh the data when returning from donation screen
-        setState(() {});
+        _loadDonations();
       });
     } else {
       setState(() {
@@ -55,7 +69,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: _isLoading 
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(50.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Stats Row
@@ -64,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.auto_stories,
-                    value: '${_donationService.getTotalDonations()}',
+                    value: '${_donations.length}',
                     label: 'कुल\nपुस्तकें',
                     iconColor: const Color(0xFF2196F3),
                   ),
@@ -73,7 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.check_circle,
-                    value: '${_donationService.getApprovedDonations()}',
+                    value: '${_donations.where((d) => d['status'] == 'स्वीकृत').length}',
                     label: 'स्वीकृत\nपुस्तकें',
                     iconColor: const Color(0xFF4CAF50),
                   ),
@@ -82,7 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.access_time,
-                    value: '${_donationService.getPendingDonations()}',
+                    value: '${_donations.where((d) => d['status'] == 'समीक्षा में').length}',
                     label: 'लंबित\nपुस्तकें',
                     iconColor: const Color(0xFFFF9800),
                   ),
@@ -91,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.group,
-                    value: '${_donationService.getUniqueDonors()}',
+                    value: '${_donations.map((d) => d['donor']).toSet().length}',
                     label: 'कुल दाता',
                     iconColor: const Color(0xFF9C27B0),
                   ),
@@ -130,7 +151,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: Color(0xFF1A1A1A),
                         ),
                       ),
-                      if (recentDonations.length > 3)
+                      if (_donations.length > 3)
                         TextButton(
                           onPressed: () {
                             _showAllDonations();
@@ -149,30 +170,65 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 20),
 
                   // Donation Items (show only first 3 if more than 3 exist)
-                  ...(recentDonations.length > 3
-                          ? recentDonations.take(3)
-                          : recentDonations)
-                      .toList()
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                        int index = entry.key;
-                        Map<String, dynamic> donation = entry.value;
-                        return Column(
+                  if (_donations.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Column(
                           children: [
-                            _buildDonationItem(
-                              index: index,
-                              bookName: donation['bookName'],
-                              author: donation['author'],
-                              donor: donation['donor'],
-                              date: donation['date'],
-                              category: donation['category'],
-                              status: donation['status'],
+                            Icon(
+                              Icons.auto_stories_outlined,
+                              size: 48,
+                              color: Colors.grey,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
+                            Text(
+                              'अभी तक कोई दान नहीं मिला',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'पहली पुस्तक दान करने के लिए "Donate Book" पर क्लिक करें',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
-                        );
-                      }),
+                        ),
+                      ),
+                    )
+                  else
+                    // Show donations
+                    ...(_donations.length > 3
+                            ? _donations.take(3)
+                            : _donations)
+                        .toList()
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          int index = entry.key;
+                          Map<String, dynamic> donation = entry.value;
+                          return Column(
+                            children: [
+                              _buildDonationItem(
+                                index: index,
+                                bookName: donation['bookName'],
+                                author: donation['author'],
+                                donor: donation['donor'],
+                                date: donation['date'],
+                                category: donation['category'],
+                                status: donation['status'],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          );
+                        }),
                 ],
               ),
             ),
@@ -421,7 +477,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onPressed: () {
                 _donationService.removeDonation(index);
                 Navigator.of(context).pop();
-                setState(() {}); // Refresh the UI
+                _loadDonations(); // Refresh the data
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text('$bookName हटा दी गई')));
@@ -435,6 +491,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _showAllDonations() {
+    // Use current donations list
+    final allDonations = _donations;
+    
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -453,7 +512,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                ...recentDonations.asMap().entries.map((entry) {
+                ...allDonations.asMap().entries.map((entry) {
                   int index = entry.key;
                   Map<String, dynamic> donation = entry.value;
                   return Column(
@@ -478,7 +537,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     ).then((_) {
       // Refresh the main screen when coming back
-      setState(() {});
+      _loadDonations();
     });
   }
 }
