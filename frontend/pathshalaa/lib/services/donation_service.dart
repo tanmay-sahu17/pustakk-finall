@@ -6,7 +6,7 @@ class DonationService {
   DonationService._internal();
 
   // Static list to store donations in memory
-  static List<Map<String, dynamic>> _donations = [
+  static final List<Map<String, dynamic>> _donations = [
     {
       'bookName': 'Dune',
       'author': 'Frank Herbert',
@@ -46,7 +46,7 @@ class DonationService {
       'category': category,
       'status': status,
     };
-    
+
     _donations.add(newDonation);
   }
 

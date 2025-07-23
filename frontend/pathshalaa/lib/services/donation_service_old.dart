@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'auth_service.dart';
 
 class DonationService {
@@ -9,6 +10,9 @@ class DonationService {
 
   static const String baseUrl = 'http://localhost:9001/api';
   final AuthService _authService = AuthService();
+
+  // Add the missing _donations list
+  final List<Map<String, dynamic>> _donations = [];
 
   Future<List<Map<String, dynamic>>> getAllDonations() async {
     try {
@@ -26,7 +30,7 @@ class DonationService {
         final data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null) {
           final List<dynamic> donationsJson = data['data'];
-          
+
           List<Map<String, dynamic>> donations = donationsJson.map((donation) {
             return {
               'id': donation['id']?.toString() ?? '',
@@ -48,14 +52,16 @@ class DonationService {
           print('=== PROCESSED DONATIONS ===');
           print('Count: ${donations.length}');
           for (var d in donations) {
-            print('Book: ${d['bookName']} by ${d['author']} - Status: ${d['status']}');
+            print(
+              'Book: ${d['bookName']} by ${d['author']} - Status: ${d['status']}',
+            );
           }
           print('===========================');
-          
+
           return donations;
         }
       }
-      
+
       print('API call failed, returning empty list');
       return [];
     } catch (e) {
@@ -66,8 +72,32 @@ class DonationService {
 
   // Legacy method for compatibility
   List<Map<String, dynamic>> getDonations() {
-    return [];
+    return _donations;
   }
+
+  // Helper method to format date
+  String _formatDate(String? dateString) {
+    if (dateString == null) return '';
+    try {
+      final date = DateTime.parse(dateString);
+      return DateFormat('dd/MM/yyyy').format(date);
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // Helper method to get status in Hindi
+  String _getStatusInHindi(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'समीक्षा में';
+      case 'approved':
+        return 'स्वीकृत';
+      case 'rejected':
+        return 'अस्वीकृत';
+      default:
+        return 'समीक्षा में';
+    }
   }
 
   // Add new donation
@@ -86,7 +116,7 @@ class DonationService {
       'category': category,
       'status': status,
     };
-    
+
     _donations.add(newDonation);
   }
 

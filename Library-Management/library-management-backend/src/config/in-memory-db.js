@@ -10,12 +10,7 @@ const connect = async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
 
-  const mongooseOpts = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  };
-
-  await mongoose.connect(uri, mongooseOpts);
+  await mongoose.connect(uri);
   console.log(`MongoDB Memory Server started at ${uri}`);
 };
 
