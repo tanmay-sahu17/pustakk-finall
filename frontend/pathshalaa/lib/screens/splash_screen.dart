@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/donation_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,12 +29,21 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    // Navigate to login screen after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-    });
+    // Initialize services and navigate to login screen after 3 seconds
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Initialize donation service
+    final donationService = DonationService();
+    await donationService.initialize();
+    
+    // Wait for animation to complete
+    await Future.delayed(const Duration(seconds: 3));
+    
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override

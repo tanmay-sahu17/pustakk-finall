@@ -228,6 +228,7 @@ const deleteDonation = async (req, res) => {
                 message: 'Donation not found'
             });
         }
+        console.log('ID to delete:', req.params.id);
 
         await donation.destroy();
 

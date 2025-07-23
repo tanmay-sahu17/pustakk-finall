@@ -92,6 +92,18 @@ class DonationService {
     }
   }
 
+  // Initialize service - call this on app startup
+  Future<void> initialize() async {
+    print('🔧 DonationService: Initializing...');
+    await testApiConnection();
+    if (_apiConnected) {
+      await fetchDonationsFromAPI();
+      print('🔧 DonationService: Initialized with ${_localDonations.length} donations');
+    } else {
+      print('🔧 DonationService: Initialized without API connection');
+    }
+  }
+
   // Get donations (fetch from API and update local cache)
   List<Map<String, dynamic>> getDonations() {
     // Start background API fetch to get latest data
@@ -156,13 +168,54 @@ class DonationService {
     }
   }
 
-  // Remove donation
-  bool removeDonation(int index) {
-    if (index >= 0 && index < _localDonations.length) {
+  // Remove donation from both API and local storage
+  Future<bool> removeDonation(int index) async {
+    if (index < 0 || index >= _localDonations.length) {
+      return false;
+    }
+
+    final donation = _localDonations[index];
+    final donationId = donation['id'];
+
+    if (donationId == null) {
+      print('No donation ID found, removing from local only');
       _localDonations.removeAt(index);
       return true;
     }
-    return false;
+
+    try {
+      if (!_apiConnected) {
+        await testApiConnection();
+      }
+
+      if (_apiConnected) {
+        final response = await http.delete(
+          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.donations}/$donationId'),
+          headers: {'Content-Type': 'application/json'},
+        ).timeout(const Duration(seconds: 10));
+
+        print('Delete API Response Status: ${response.statusCode}');
+        print('Delete API Response Body: ${response.body}');
+
+        if (response.statusCode == 200) {
+          print('Successfully deleted donation from API');
+          // Remove from local cache after successful API deletion
+          _localDonations.removeAt(index);
+          // Refresh data from API to ensure consistency
+          await fetchDonationsFromAPI();
+          return true;
+        } else {
+          print('Failed to delete donation from API: ${response.statusCode}');
+          return false;
+        }
+      } else {
+        print('API not connected, cannot delete donation');
+        return false;
+      }
+    } catch (e) {
+      print('Error deleting donation from API: $e');
+      return false;
+    }
   }
 
   // Statistics methods

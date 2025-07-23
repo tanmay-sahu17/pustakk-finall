@@ -25,17 +25,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _isLoading = true;
     });
 
+    print('🔍 Dashboard: Starting to load donations...');
+    
     // Test API connection first
-    await _donationService.testApiConnection();
+    final apiConnected = await _donationService.testApiConnection();
+    print('🔍 Dashboard: API Connection result: $apiConnected');
     
     // Load donations from API
     final donations = await _donationService.getDonationsAsync();
+    print('🔍 Dashboard: Received ${donations.length} donations from service');
+    print('🔍 Dashboard: Donations data: $donations');
     
     if (mounted) {
       setState(() {
         _donations = donations;
         _isLoading = false;
       });
+      print('🔍 Dashboard: State updated with ${_donations.length} donations');
     }
   }
 
@@ -474,13 +480,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Text('रद्द करें'),
             ),
             TextButton(
-              onPressed: () {
-                _donationService.removeDonation(index);
+              onPressed: () async {
                 Navigator.of(context).pop();
-                _loadDonations(); // Refresh the data
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('$bookName हटा दी गई')));
+                
+                // Show loading indicator
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('पुस्तक हटाई जा रही है...')),
+                );
+
+                try {
+                  final success = await _donationService.removeDonation(index);
+                  if (success) {
+                    _loadDonations(); // Refresh the data
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('$bookName सफलतापूर्वक हटा दी गई')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('$bookName हटाने में त्रुटि हुई'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('नेटवर्क त्रुटि: पुस्तक नहीं हटाई जा सकी'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               child: const Text('हटाएं', style: TextStyle(color: Colors.red)),
             ),
