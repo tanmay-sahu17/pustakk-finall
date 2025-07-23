@@ -449,16 +449,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
 
                   const SizedBox(height: 24),
-
-                  // Bottom Indicator
-                  Container(
-                    width: 134,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(2.5),
-                    ),
-                  ),
                 ],
               ),
             ),
