@@ -117,7 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Stats Row
+            // Stats Cards - 2x2 Grid
             Row(
               children: [
                 Expanded(
@@ -128,7 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     iconColor: const Color(0xFF2196F3),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.check_circle,
@@ -137,7 +137,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     iconColor: const Color(0xFF4CAF50),
                   ),
                 ),
-                const SizedBox(width: 12),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            Row(
+              children: [
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.access_time,
@@ -146,7 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     iconColor: const Color(0xFFFF9800),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.group,
@@ -299,76 +305,100 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String label,
     required Color iconColor,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.white, iconColor.withValues(alpha: 0.02)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: iconColor.withValues(alpha: 0.2), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: iconColor.withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate responsive sizes based on available width
+        double cardWidth = constraints.maxWidth;
+        double iconSize = (cardWidth * 0.15).clamp(26.0, 34.0);
+        double fontSize = (cardWidth * 0.14).clamp(24.0, 30.0);
+        double labelFontSize = (cardWidth * 23).clamp(12.0, 15.0);
+        
+        return Container(
+          height: 140,
+          padding: EdgeInsets.symmetric(
+            horizontal: (cardWidth * 0.08).clamp(12.0, 20.0),
+            vertical: 16,
           ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  iconColor.withValues(alpha: 0.1),
-                  iconColor.withValues(alpha: 0.2),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.white, iconColor.withValues(alpha: 0.05)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: iconColor.withValues(alpha: 0.3), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: iconColor.withValues(alpha: 0.2),
+                blurRadius: 15,
+                offset: const Offset(0, 6),
               ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: iconColor.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all((iconSize * 0.4).clamp(10.0, 16.0)),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      iconColor.withValues(alpha: 0.15),
+                      iconColor.withValues(alpha: 0.25),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: iconColor.withValues(alpha: 0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Icon(icon, color: iconColor, size: 28),
+                child: Icon(icon, color: iconColor, size: iconSize),
+              ),
+              SizedBox(height: (cardWidth * 0.04).clamp(8.0, 12.0)),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1A1A1A),
+                  ),
+                ),
+              ),
+              SizedBox(height: (cardWidth * 0.02).clamp(2.0, 6.0)),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: labelFontSize,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A1A),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
-              height: 1.3,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
