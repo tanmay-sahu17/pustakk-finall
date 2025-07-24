@@ -83,7 +83,7 @@ class _DonateBookScreenState extends State<DonateBookScreen> {
       });
 
       try {
-        print('🔄 Submitting donation to backend...');
+        // print('🔄 Submitting donation to backend...');
         
         // Add donation to service with proper API call
         final donationService = DonationService();
@@ -138,7 +138,7 @@ class _DonateBookScreenState extends State<DonateBookScreen> {
           }
         }
       } catch (e) {
-        print('❌ Error submitting donation: $e');
+        // print('❌ Error submitting donation: $e');
         setState(() {
           _isLoading = false;
         });

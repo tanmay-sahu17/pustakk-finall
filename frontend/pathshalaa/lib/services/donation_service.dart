@@ -16,24 +16,24 @@ class DonationService {
   // Test API connection
   Future<bool> testApiConnection() async {
     try {
-      print('Testing API connection to: ${ApiConstants.baseUrl}/api/test');
+      // print('Testing API connection to: ${ApiConstants.baseUrl}/api/test');
       final response = await http.get(
         Uri.parse('${ApiConstants.baseUrl}/api/test'),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print('API Test Success: ${data['message']}');
+        // final data = json.decode(response.body);
+        // print('API Test Success: ${data['message']}');
         _apiConnected = true;
         return true;
       } else {
-        print('API Test Failed: Status ${response.statusCode}');
+        // print('API Test Failed: Status ${response.statusCode}');
         _apiConnected = false;
         return false;
       }
     } catch (e) {
-      print('API Test Error: $e');
+      // print('API Test Error: $e');
       _apiConnected = false;
       return false;
     }
@@ -47,25 +47,25 @@ class DonationService {
       }
 
       if (!_apiConnected) {
-        print('API not connected, using local data');
+        // print('API not connected, using local data');
         return _localDonations;
       }
 
-      print('Fetching donations from: ${ApiConstants.fullDonationsUrl}');
+      // print('Fetching donations from: ${ApiConstants.fullDonationsUrl}');
       final response = await http.get(
         Uri.parse(ApiConstants.fullDonationsUrl),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 
-      print('API Response Status: ${response.statusCode}');
-      print('API Response Body: ${response.body}');
+      // print('API Response Status: ${response.statusCode}');
+      // print('API Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
           final List<dynamic> donations = data['data'];
           _apiDonations = donations.cast<Map<String, dynamic>>();
-          print('Successfully fetched ${_apiDonations.length} donations from API');
+          // print('Successfully fetched ${_apiDonations.length} donations from API');
           
           // Update local cache with API data
           _localDonations = List.from(_apiDonations);
@@ -83,24 +83,24 @@ class DonationService {
           return _localDonations;
         }
       } else {
-        print('HTTP Error: ${response.statusCode}');
+        // print('HTTP Error: ${response.statusCode}');
         return _localDonations;
       }
     } catch (e) {
-      print('Network Error: $e');
+      // print('Network Error: $e');
       return _localDonations;
     }
   }
 
   // Initialize service - call this on app startup
   Future<void> initialize() async {
-    print('🔧 DonationService: Initializing...');
+    // print('🔧 DonationService: Initializing...');
     await testApiConnection();
     if (_apiConnected) {
       await fetchDonationsFromAPI();
-      print('🔧 DonationService: Initialized with ${_localDonations.length} donations');
+      // print('🔧 DonationService: Initialized with ${_localDonations.length} donations');
     } else {
-      print('🔧 DonationService: Initialized without API connection');
+      // print('🔧 DonationService: Initialized without API connection');
     }
   }
 
@@ -150,20 +150,20 @@ class DonationService {
         ).timeout(const Duration(seconds: 10));
 
         if (response.statusCode == 201) {
-          print('Successfully synced donation to API');
+          // print('Successfully synced donation to API');
           // Refresh local data from API
           await fetchDonationsFromAPI();
           return true;
         } else {
-          print('Failed to sync donation to API: ${response.statusCode}');
+          // print('Failed to sync donation to API: ${response.statusCode}');
           return false;
         }
       } else {
-        print('API not connected, cannot add donation');
+        // print('API not connected, cannot add donation');
         return false;
       }
     } catch (e) {
-      print('Error syncing donation to API: $e');
+      // print('Error syncing donation to API: $e');
       return false;
     }
   }
@@ -178,7 +178,7 @@ class DonationService {
     final donationId = donation['id'];
 
     if (donationId == null) {
-      print('No donation ID found, removing from local only');
+      // print('No donation ID found, removing from local only');
       _localDonations.removeAt(index);
       return true;
     }
@@ -194,26 +194,26 @@ class DonationService {
           headers: {'Content-Type': 'application/json'},
         ).timeout(const Duration(seconds: 10));
 
-        print('Delete API Response Status: ${response.statusCode}');
-        print('Delete API Response Body: ${response.body}');
+        // print('Delete API Response Status: ${response.statusCode}');
+        // print('Delete API Response Body: ${response.body}');
 
         if (response.statusCode == 200) {
-          print('Successfully deleted donation from API');
+          // print('Successfully deleted donation from API');
           // Remove from local cache after successful API deletion
           _localDonations.removeAt(index);
           // Refresh data from API to ensure consistency
           await fetchDonationsFromAPI();
           return true;
         } else {
-          print('Failed to delete donation from API: ${response.statusCode}');
+          // print('Failed to delete donation from API: ${response.statusCode}');
           return false;
         }
       } else {
-        print('API not connected, cannot delete donation');
+        // print('API not connected, cannot delete donation');
         return false;
       }
     } catch (e) {
-      print('Error deleting donation from API: $e');
+      // print('Error deleting donation from API: $e');
       return false;
     }
   }

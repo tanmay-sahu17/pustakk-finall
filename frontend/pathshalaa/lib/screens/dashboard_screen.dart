@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _isLoading = true;
     });
 
-    print('🔍 Dashboard: Starting to load donations...');
+    // print('🔍 Dashboard: Starting to load donations...');
     
     try {
       // Initialize donation service first
@@ -33,41 +33,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       
       // Test API connection
       final apiConnected = await _donationService.testApiConnection();
-      print('🔍 Dashboard: API Connection result: $apiConnected');
+      // print('🔍 Dashboard: API Connection result: $apiConnected');
       
       // Load donations from API
       final donations = await _donationService.getDonationsAsync();
-      print('🔍 Dashboard: Received ${donations.length} donations from service');
-      print('🔍 Dashboard: Donations data: $donations');
+      // print('🔍 Dashboard: Received ${donations.length} donations from service');
+      // print('🔍 Dashboard: Donations data: $donations');
       
       if (mounted) {
         setState(() {
           _donations = donations;
           _isLoading = false;
         });
-        print('🔍 Dashboard: State updated with ${_donations.length} donations');
+        // print('🔍 Dashboard: State updated with ${_donations.length} donations');
         
-        // Show connection status
-        if (apiConnected) {
+        
+        // Show connection status only if there are issues
+        if (!apiConnected) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ API से जुड़ाव सफल'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('⚠️ API से जुड़ाव नहीं, स्थानीय डेटा का उपयोग कर रहे हैं'),
+              content: Text('⚠️ Problem in server'),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 2),
             ),
           );
         }
+        // Note: Login success message should only be shown from login screen, not here
       }
     } catch (e) {
-      print('❌ Dashboard: Error loading donations: $e');
+      // print('❌ Dashboard: Error loading donations: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
