@@ -8,7 +8,7 @@ class BookService {
   factory BookService() => _instance;
   BookService._internal();
 
-  static const String baseUrl = 'http://localhost:9001/api';
+  static const String baseUrl = 'http://10.0.2.2:9006/api';
   final AuthService _authService = AuthService();
 
   Future<List<Book>> getAllBooks({

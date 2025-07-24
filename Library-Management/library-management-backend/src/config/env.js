@@ -21,5 +21,5 @@ module.exports = {
     CERTIFICATES_PATH: process.env.CERTIFICATES_PATH || 'uploads/certificates/',
     
     // Database selection
-    USE_MEMORY_DB: process.env.USE_MEMORY_DB === 'true',
+    USE_MEMORY_DB: process.env.USE_MEMORY_DB === 'true', // Use MySQL by default
 };

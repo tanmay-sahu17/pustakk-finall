@@ -13,7 +13,9 @@ const getAllDonations = async (req, res) => {
             id: donation.id,
             bookName: donation.bookTitle,
             author: donation.bookAuthor,
-            donor: `Donor ${donation.donorId}`, // Temporary - will link with user table later
+            donor: donation.bookDescription && donation.bookDescription.includes('Donor:') 
+                   ? donation.bookDescription.split('Donor:')[1].split(',')[0].trim()
+                   : `डोनर ${donation.id}`, // Fallback donor name
             date: new Date(donation.createdAt).toLocaleDateString('hi-IN'),
             category: donation.bookGenre,
             status: donation.status === 'PENDING' ? 'समीक्षा में' : 
@@ -54,7 +56,9 @@ const getDonationById = async (req, res) => {
             id: donation.id,
             bookName: donation.bookTitle,
             author: donation.bookAuthor,
-            donor: `Donor ${donation.donorId}`, // Temporary - will link with user table later
+            donor: donation.bookDescription && donation.bookDescription.includes('Donor:') 
+                   ? donation.bookDescription.split('Donor:')[1].split(',')[0].trim()
+                   : `डोनर ${donation.id}`, // Fallback donor name
             date: new Date(donation.createdAt).toLocaleDateString('hi-IN'),
             category: donation.bookGenre,
             status: donation.status === 'PENDING' ? 'समीक्षा में' : 
@@ -103,12 +107,12 @@ const createDonation = async (req, res) => {
 
         const newDonation = await Donation.create({
             donationId,
-            donorId: 1, // Default donor ID for now
+            donorId: null, // Allow null for now to avoid foreign key constraint
             bookTitle: bookName,
             bookAuthor: author,
             bookGenre: category,
             bookCondition: condition,
-            bookDescription: description,
+            bookDescription: description || `Donor: ${donorName}`,
             status: 'PENDING',
             submissionDate: new Date()
         });
@@ -117,7 +121,7 @@ const createDonation = async (req, res) => {
             id: newDonation.id,
             bookName: newDonation.bookTitle,
             author: newDonation.bookAuthor,
-            donor: `Donor ${newDonation.donorId}`,
+            donor: donorName, // Use the actual donor name from request
             date: new Date(newDonation.createdAt).toLocaleDateString('hi-IN'),
             category: newDonation.bookGenre,
             status: 'समीक्षा में',

@@ -5,8 +5,15 @@ import 'screens/dashboard_screen.dart';
 import 'screens/books_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/donate_book_screen.dart';
+import 'services/auth_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize AuthService
+  final authService = AuthService();
+  await authService.initialize();
+  
   runApp(const PustakalayApp());
 }
 

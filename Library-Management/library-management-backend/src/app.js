@@ -17,13 +17,28 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:8080'],
+    origin: [
+        'http://localhost:3000', 
+        'http://127.0.0.1:3000', 
+        'http://localhost:8080',
+        'http://localhost:8000',
+        'http://localhost:9000',
+        'http://localhost:3001',
+        'http://10.0.2.2:9005',
+        'http://10.0.2.2:8080',
+        '*' // Allow all origins for development
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    credentials: false // Set to false for broader compatibility
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Test endpoint for API connectivity
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'API is working', timestamp: new Date().toISOString() });
+});
 
 // Database connection
 const { connectDB } = require('./config/database');

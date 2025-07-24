@@ -27,21 +27,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     print('🔍 Dashboard: Starting to load donations...');
     
-    // Test API connection first
-    final apiConnected = await _donationService.testApiConnection();
-    print('🔍 Dashboard: API Connection result: $apiConnected');
-    
-    // Load donations from API
-    final donations = await _donationService.getDonationsAsync();
-    print('🔍 Dashboard: Received ${donations.length} donations from service');
-    print('🔍 Dashboard: Donations data: $donations');
-    
-    if (mounted) {
-      setState(() {
-        _donations = donations;
-        _isLoading = false;
-      });
-      print('🔍 Dashboard: State updated with ${_donations.length} donations');
+    try {
+      // Initialize donation service first
+      await _donationService.initialize();
+      
+      // Test API connection
+      final apiConnected = await _donationService.testApiConnection();
+      print('🔍 Dashboard: API Connection result: $apiConnected');
+      
+      // Load donations from API
+      final donations = await _donationService.getDonationsAsync();
+      print('🔍 Dashboard: Received ${donations.length} donations from service');
+      print('🔍 Dashboard: Donations data: $donations');
+      
+      if (mounted) {
+        setState(() {
+          _donations = donations;
+          _isLoading = false;
+        });
+        print('🔍 Dashboard: State updated with ${_donations.length} donations');
+        
+        // Show connection status
+        if (apiConnected) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ API से जुड़ाव सफल'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ API से जुड़ाव नहीं, स्थानीय डेटा का उपयोग कर रहे हैं'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Dashboard: Error loading donations: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ डेटा लोड करने में त्रुटि: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 

@@ -14,11 +14,7 @@ const Donation = sequelize.define('Donation', {
   },
   donorId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
+    allowNull: true // Make it nullable - no foreign key constraint for now
   },
   // Book details embedded in donation
   bookTitle: {
@@ -120,7 +116,7 @@ const Donation = sequelize.define('Donation', {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'Books',
+      model: 'books',
       key: 'id'
     }
   }

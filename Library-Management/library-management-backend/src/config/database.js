@@ -28,9 +28,10 @@ const connectDB = async () => {
         
         // Sync all models (create tables if they don't exist)
         await sequelize.sync({ 
-            force: false,  // Set to true to drop and recreate tables
-            alter: false   // Set to true to alter existing tables
+            force: false,  // Don't drop existing tables
+            alter: true    // Allow altering existing tables to match model changes
         });
+        console.log('Database tables synchronized');
         console.log('Database tables synchronized');
         
     } catch (error) {

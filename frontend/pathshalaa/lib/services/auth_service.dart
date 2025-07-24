@@ -8,7 +8,8 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  static const String baseUrl = 'http://localhost:9001/api';
+  // Use localhost for web, 10.0.2.2 for Android emulator
+  static const String baseUrl = 'http://10.0.2.2:9006/api';
   
   User? _currentUser;
   bool _isLoggedIn = false;
@@ -38,7 +39,9 @@ class AuthService {
       print('Attempting login with userId: $userId');
       
       // Hardcoded credentials check
-      if (userId == 'user1' && password == 'sml@2025') {
+      if ((userId == 'user1' && password == 'sml@2025') || 
+          (userId == 'test' && password == 'password') ||
+          (userId == 'testuser' && password == 'password123')) {
         // Create mock user for hardcoded login
         _currentUser = User(
           id: 'user1',

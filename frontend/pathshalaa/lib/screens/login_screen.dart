@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,193 +28,223 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        final authService = AuthService();
+        bool success = await authService.login(
+          _loginController.text.trim(),
+          _passwordController.text.trim(),
+        );
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        if (success && mounted) {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('लॉगिन में त्रुटि: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenHeight < 700;
+    final isTablet = screenWidth > 600;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 80),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? constraints.maxWidth * 0.2 : 20.0,
+                vertical: isSmallScreen ? 10 : 20,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - (isSmallScreen ? 20 : 40),
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(height: isSmallScreen ? 40 : 60),
 
-                      // Logo Container
-                      Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8F4FD),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
+                    // Logo Container
+                    Container(
+                      width: isSmallScreen ? 100 : (isTablet ? 140 : 120),
+                      height: isSmallScreen ? 100 : (isTablet ? 140 : 120),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F4FD),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Container(
+                          width: isSmallScreen ? 60 : (isTablet ? 80 : 70),
+                          height: isSmallScreen ? 60 : (isTablet ? 80 : 70),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF2196F3),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12),
                             ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF2196F3),
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
+                          ),
+                          child: Stack(
+                            children: [
+                              // Books representation - responsive positioning
+                              Positioned(
+                                left: isSmallScreen ? 12 : 16,
+                                top: isSmallScreen ? 10 : 13,
+                                child: Column(
+                                  children: [
+                                    // First book
+                                    Container(
+                                      width: isSmallScreen ? 10 : 12,
+                                      height: isSmallScreen ? 30 : 35,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(2),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Container(
+                                      width: isSmallScreen ? 10 : 12,
+                                      height: isSmallScreen ? 6 : 7,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF1976D2),
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(1),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            child: Stack(
-                              children: [
-                                // Books representation
-                                Positioned(
-                                  left: 18,
-                                  top: 15,
-                                  child: Column(
-                                    children: [
-                                      // First book
-                                      Container(
-                                        width: 14,
-                                        height: 40,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(2),
-                                          ),
+                              // Second book (taller)
+                              Positioned(
+                                left: isSmallScreen ? 24 : 30,
+                                top: isSmallScreen ? 6 : 8,
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: isSmallScreen ? 10 : 12,
+                                      height: isSmallScreen ? 38 : 45,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(2),
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
-                                      Container(
-                                        width: 14,
-                                        height: 8,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF1976D2),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(1),
-                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Container(
+                                      width: isSmallScreen ? 10 : 12,
+                                      height: isSmallScreen ? 6 : 7,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF1976D2),
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(1),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                // Second book (taller)
-                                Positioned(
-                                  left: 34,
-                                  top: 10,
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 14,
-                                        height: 50,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(2),
-                                          ),
+                              ),
+                              // Third book
+                              Positioned(
+                                left: isSmallScreen ? 36 : 44,
+                                top: isSmallScreen ? 10 : 13,
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: isSmallScreen ? 10 : 12,
+                                      height: isSmallScreen ? 30 : 35,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(2),
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
-                                      Container(
-                                        width: 14,
-                                        height: 8,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF1976D2),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(1),
-                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Container(
+                                      width: isSmallScreen ? 10 : 12,
+                                      height: isSmallScreen ? 6 : 7,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF1976D2),
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(1),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                // Third book
-                                Positioned(
-                                  left: 50,
-                                  top: 15,
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 14,
-                                        height: 40,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(2),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Container(
-                                        width: 14,
-                                        height: 8,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF1976D2),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(1),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
+                    ),
 
-                      const SizedBox(height: 40),
+                    SizedBox(height: isSmallScreen ? 20 : 30),
 
-                      // App Title
-                      const Text(
-                        'स्मृति पुस्तकालय',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A1A),
-                          letterSpacing: 0.5,
-                        ),
+                    // App Title
+                    Text(
+                      'स्मृति पुस्तकालय',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 24 : (isTablet ? 32 : 28),
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1A1A1A),
+                        letterSpacing: 0.5,
                       ),
+                    ),
 
-                      const SizedBox(height: 60),
+                    SizedBox(height: isSmallScreen ? 20 : 30),
 
-                      // Login Form Card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                    // Login Form Card
+                    Container(
+                      width: double.infinity,
+                      constraints: BoxConstraints(
+                        maxWidth: isTablet ? 400 : double.infinity,
+                      ),
+                      padding: EdgeInsets.all(isSmallScreen ? 20 : 24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                               // Login ID Label
                               const Text(
                                 'लॉगिन आईडी',
@@ -400,59 +431,80 @@ class _LoginScreenState extends State<LoginScreen> {
                                             strokeWidth: 2,
                                           ),
                                         )
-                                      : const Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              '🔁',
-                                              style: TextStyle(fontSize: 18),
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              'लॉगिन करें',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
+                                      : const Text(
+                                          'लॉगिन करें',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                 ),
                               ),
-                            ],
-                          ),
+
+                            const SizedBox(height: 16),
+
+                            // Terms Text
+                            Text(
+                              'लॉगिन करके, आप हमारी शर्तों और गोपनीयता नीति से सहमत होते हैं।',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 11 : 12,
+                                color: const Color(0xFF6B7280),
+                                fontFamily: 'times new roman',
+                              ),
+                            ),
+
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+
+                            // Powered by Text
+                            Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Powered by',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 11 : 12,
+                                      color: const Color(0xFF6B7280),
+                                      fontFamily: 'times new roman',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'SSIPMT RAIPUR',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 16 : (isTablet ? 20 : 18),
+                                      color: const Color.fromARGB(255, 56, 116, 212),
+                                      fontWeight: FontWeight.w800,
+                                      fontFamily: 'gotham',
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Version 1.0.0',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 10 : 11,
+                                      color: const Color.fromARGB(255, 162, 169, 181),
+                                      fontFamily: 'Gotham',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                    ),
 
-                      const SizedBox(height: 40),
-                    ],
-                  ),
+                    SizedBox(height: isSmallScreen ? 15 : 20),
+                  ],
                 ),
               ),
-            ),
-
-            // Bottom Text and Indicator
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-              child: Column(
-                children: [
-                  // Terms Text
-                  const Text(
-                    'लॉगिन करके, आप हमारी सेवा शर्तों और गोपनीयता नीति से सहमत हैं।',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF6B7280),
-                      height: 1.4,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

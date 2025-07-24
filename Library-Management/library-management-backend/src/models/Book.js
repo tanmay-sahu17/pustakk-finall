@@ -66,7 +66,7 @@ const Book = sequelize.define('Book', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'Admins',
+            model: 'admins',  // Corrected table name
             key: 'id'
         }
     },
@@ -74,7 +74,7 @@ const Book = sequelize.define('Book', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'Users',
+            model: 'users',   // Corrected table name
             key: 'id'
         }
     },
