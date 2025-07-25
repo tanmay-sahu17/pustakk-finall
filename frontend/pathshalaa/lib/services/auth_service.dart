@@ -8,8 +8,8 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  // Use localhost for web, 10.0.2.2 for Android emulator
-  static const String baseUrl = 'http://10.0.2.2:9006/api';
+  // Using your computer's actual IP address for real device connection
+  static const String baseUrl = 'http://192.168.29.44:9003/api';
   
   User? _currentUser;
   bool _isLoggedIn = false;

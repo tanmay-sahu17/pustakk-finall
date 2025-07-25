@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/books_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/donate_book_screen.dart';
-import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize AuthService
-  final authService = AuthService();
-  await authService.initialize();
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   
   runApp(const PustakalayApp());
 }
@@ -39,9 +40,8 @@ class PustakalayApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: '/',
+      home: const SplashScreen(), // Use home instead of initialRoute
       routes: {
-        '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/dashboard': (context) => const DashboardScreen(),
         '/books': (context) => const BooksScreen(),

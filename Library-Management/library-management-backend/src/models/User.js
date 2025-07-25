@@ -42,13 +42,34 @@ const User = sequelize.define('User', {
     allowNull: true
   },
   address: {
-    type: DataTypes.JSON,
+    type: DataTypes.TEXT,
     allowNull: true,
-    defaultValue: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
+    defaultValue: '{"street":"","city":"","state":"","zipCode":""}',
+    get() {
+      const value = this.getDataValue('address');
+      try {
+        return value ? JSON.parse(value) : {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: ''
+        };
+      } catch (e) {
+        return {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: ''
+        };
+      }
+    },
+    set(value) {
+      this.setDataValue('address', JSON.stringify(value || {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      }));
     }
   },
   membershipType: {

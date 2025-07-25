@@ -9,21 +9,21 @@ const Admin = sequelize.define('Admin', {
     autoIncrement: true,
   },
   adminId: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(50),
     allowNull: false,
     unique: true
   },
   username: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(100),
     allowNull: false,
     unique: true
   },
   password: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   email: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false,
     unique: true,
     validate: {
@@ -31,11 +31,11 @@ const Admin = sequelize.define('Admin', {
     }
   },
   firstName: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(100),
     allowNull: false
   },
   lastName: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(100),
     allowNull: false
   },
   role: {
@@ -43,9 +43,20 @@ const Admin = sequelize.define('Admin', {
     defaultValue: 'Admin'
   },
   permissions: {
-    type: DataTypes.JSON, // Store permissions array as JSON
+    type: DataTypes.TEXT, // Store permissions array as JSON, using TEXT for MySQL compatibility
     allowNull: true,
-    defaultValue: []
+    defaultValue: '[]',
+    get() {
+      const value = this.getDataValue('permissions');
+      try {
+        return value ? JSON.parse(value) : [];
+      } catch (e) {
+        return [];
+      }
+    },
+    set(value) {
+      this.setDataValue('permissions', JSON.stringify(value || []));
+    }
   },
   isActive: {
     type: DataTypes.BOOLEAN,

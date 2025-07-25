@@ -29,7 +29,7 @@ const findAvailablePort = (startPort, callback) => {
         
         server.once('error', (err) => {
             if (err.code === 'EADDRINUSE') {
-                console.log(`Port ${currentPort} is in use, trying next port...`);
+                // Remove verbose port trying messages
                 tryPort(currentPort + 1);
             } else {
                 callback(err);
@@ -50,13 +50,30 @@ const findAvailablePort = (startPort, callback) => {
 
 // Try to start the server on an available port
 const preferredPort = process.env.PORT || 9000;
+console.log(`Starting server on port ${preferredPort}...`);
+
 findAvailablePort(preferredPort, (err, availablePort) => {
     if (err) {
         console.error('Error finding available port:', err);
         process.exit(1);
     }
     
-    app.listen(availablePort, () => {
-        console.log(`Server is running on http://localhost:${availablePort}`);
+    const server = app.listen(availablePort, () => {
+        console.log(`🚀 Server running on http://localhost:${availablePort}`);
+    });
+    
+    // Handle server errors
+    server.on('error', (err) => {
+        console.error('Server error:', err);
+        process.exit(1);
+    });
+    
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+        console.log('SIGTERM received. Shutting down gracefully...');
+        server.close(() => {
+            console.log('Server closed.');
+            process.exit(0);
+        });
     });
 });

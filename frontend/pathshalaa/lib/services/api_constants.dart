@@ -1,8 +1,8 @@
 // API Configuration
 class ApiConstants {
   // Base URL for the backend server
-  // Use localhost for web, 10.0.2.2 for Android emulator
-  static const String baseUrl = 'http://10.0.2.2:9006';
+  // Using computer's actual IP address for real device connection
+  static const String baseUrl = 'http://192.168.29.44:9003';
   
   // API endpoints
   static const String apiPrefix = '/api';

@@ -1,6 +1,10 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+// Import referenced models
+const Admin = require('./Admin');
+const User = require('./User');
+
 const Book = sequelize.define('Book', {
     id: {
         type: DataTypes.INTEGER,
@@ -33,11 +37,11 @@ const Book = sequelize.define('Book', {
         unique: true,
     },
     coverImage: {
-        type: DataTypes.STRING, // Path to the uploaded image file
+        type: DataTypes.STRING,
         allowNull: true,
     },
     pdfUrl: {
-        type: DataTypes.STRING, // Path to the uploaded PDF file
+        type: DataTypes.STRING,
         allowNull: true,
     },
     hasEbook: {
@@ -66,7 +70,7 @@ const Book = sequelize.define('Book', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'admins',  // Corrected table name
+            model: Admin,
             key: 'id'
         }
     },
@@ -74,22 +78,23 @@ const Book = sequelize.define('Book', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'users',   // Corrected table name
+            model: User,
             key: 'id'
         }
     },
     borrowedBy: {
-        type: DataTypes.JSON, // Store array of borrowing records
+        type: DataTypes.JSON,
         allowNull: true,
         defaultValue: []
     },
 }, {
     timestamps: true,
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    freezeTableName: true // Optional: disables plural table names
 });
 
-// Virtual methods for borrowing operations
+// Virtual methods
 Book.prototype.addBorrower = function(userId, borrowDate = new Date()) {
     const borrowedBy = this.borrowedBy || [];
     borrowedBy.push({

@@ -46,6 +46,7 @@ const { connectDB } = require('./config/database');
 // Check if we should use in-memory DB (for development/testing) or real MySQL
 const useInMemoryDb = env.USE_MEMORY_DB;
 
+// Connect to database asynchronously (don't block app startup)
 if (useInMemoryDb) {
     console.log('Using in-memory database for development/testing...');
     const dbConfig = require('./config/in-memory-db');
@@ -53,9 +54,7 @@ if (useInMemoryDb) {
         .then(() => console.log('In-memory database connected successfully'))
         .catch(err => console.error('In-memory database connection error:', err));
 } else {
-    console.log(`Attempting to connect to MySQL database...`);
-    
-    // Connect to MySQL database
+    // Connect to MySQL database without blocking
     connectDB()
         .then(() => console.log('MySQL database connection and sync completed'))
         .catch(err => {
@@ -65,7 +64,6 @@ if (useInMemoryDb) {
             console.log('2. Check your database credentials in .env file');
             console.log('3. Make sure the database exists or create it');
             console.log('4. Set USE_MEMORY_DB=true in your .env to use in-memory database');
-            process.exit(1); // Exit with error
         });
 }
 

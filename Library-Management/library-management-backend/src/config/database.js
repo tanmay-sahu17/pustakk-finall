@@ -10,12 +10,16 @@ const sequelize = new Sequelize(
         host: env.DB_HOST || 'localhost',
         port: env.DB_PORT || 3306,
         dialect: 'mysql',
-        logging: env.NODE_ENV === 'development' ? console.log : false,
+        logging: false, // Disable SQL logging for faster startup
         pool: {
-            max: 5,
+            max: 3,        // Reduced from 5
             min: 0,
-            acquire: 30000,
-            idle: 10000
+            acquire: 10000, // Reduced from 30000
+            idle: 5000     // Reduced from 10000
+        },
+        dialectOptions: {
+            connectTimeout: 5000,  // 5 seconds connection timeout
+            // Removed acquireTimeout and timeout - not supported in MySQL2
         }
     }
 );
@@ -23,16 +27,18 @@ const sequelize = new Sequelize(
 // Test the connection
 const connectDB = async () => {
     try {
+        console.log('Connecting to MySQL...');
         await sequelize.authenticate();
         console.log('MySQL connected successfully');
         
-        // Sync all models (create tables if they don't exist)
-        await sequelize.sync({ 
-            force: false,  // Don't drop existing tables
-            alter: true    // Allow altering existing tables to match model changes
-        });
-        console.log('Database tables synchronized');
-        console.log('Database tables synchronized');
+        // Only sync if tables don't exist (faster startup)
+        if (env.NODE_ENV === 'development') {
+            await sequelize.sync({ 
+                force: false,  // Don't drop existing tables
+                alter: true   // Allow altering existing tables to match models
+            });
+            console.log('Database tables synchronized');
+        }
         
     } catch (error) {
         console.error('MySQL connection failed:', error.message);
