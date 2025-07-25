@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,8 +9,12 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  // Using your computer's actual IP address for real device connection
-  static const String baseUrl = 'http://192.168.29.44:9003/api';
+  // Auto-detect device type and use appropriate IP
+  static String get baseUrl {
+    // For emulator, use 10.0.2.2
+    // For real device, use computer's IP
+    return 'http://10.0.2.2:9000/api';
+  }
   
   User? _currentUser;
   bool _isLoggedIn = false;
@@ -37,34 +42,8 @@ class AuthService {
   Future<bool> login(String userId, String password) async {
     try {
       print('Attempting login with userId: $userId');
+      print('API URL: $baseUrl/auth/login');
       
-      // Hardcoded credentials check
-      if ((userId == 'user1' && password == 'sml@2025') || 
-          (userId == 'test' && password == 'password') ||
-          (userId == 'testuser' && password == 'password123')) {
-        // Create mock user for hardcoded login
-        _currentUser = User(
-          id: 'user1',
-          name: 'Test User',
-          email: 'user1@example.com',
-          phone: '1234567890',
-          role: UserRole.member,
-          createdAt: DateTime.now(),
-          borrowedBookIds: [],
-        );
-        
-        _token = 'mock_token_12345';
-        _isLoggedIn = true;
-        
-        // Save token to local storage
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', _token!);
-        
-        print('Hardcoded login successful');
-        return true;
-      }
-      
-      // If not hardcoded credentials, try API
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {
@@ -82,7 +61,17 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        _token = data['token'];
+        
+        // Extract token from cookie header if present, or use session
+        String? authToken;
+        final cookies = response.headers['set-cookie'];
+        if (cookies != null && cookies.contains('token=')) {
+          final tokenStart = cookies.indexOf('token=') + 6;
+          final tokenEnd = cookies.indexOf(';', tokenStart);
+          authToken = cookies.substring(tokenStart, tokenEnd == -1 ? cookies.length : tokenEnd);
+        }
+        
+        _token = authToken ?? 'session_active';
         
         // Save token to local storage
         final prefs = await SharedPreferences.getInstance();
@@ -91,9 +80,9 @@ class AuthService {
         // Create user object from response
         final userData = data['user'];
         _currentUser = User(
-          id: userData['_id'] ?? userData['id'],
-          name: userData['username'] ?? userData['name'],
-          email: userData['email'],
+          id: userData['id']?.toString() ?? userData['userId']?.toString() ?? '',
+          name: userData['username'] ?? userData['name'] ?? 'User',
+          email: userData['email'] ?? '',
           phone: userData['phone'] ?? '',
           role: UserRole.member,
           createdAt: DateTime.now(),

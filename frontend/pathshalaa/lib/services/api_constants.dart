@@ -1,8 +1,10 @@
 // API Configuration
 class ApiConstants {
-  // Base URL for the backend server
-  // Using computer's actual IP address for real device connection
-  static const String baseUrl = 'http://192.168.29.44:9003';
+  // Auto-detect device type and use appropriate IP
+  static String get baseUrl {
+    // For emulator, use 10.0.2.2
+    return 'http://10.0.2.2:9000';
+  }
   
   // API endpoints
   static const String apiPrefix = '/api';

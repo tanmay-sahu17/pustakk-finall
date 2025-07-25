@@ -104,10 +104,14 @@ const createDonation = async (req, res) => {
 
         // Generate donation ID
         const donationId = `DON-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Use a default donor ID from existing users (assuming user with ID 3 exists)
+        // In a real app, this would come from authenticated user session
+        const donorId = 3; // Using known user ID
 
         const newDonation = await Donation.create({
             donationId,
-            donorId: null, // Allow null for now to avoid foreign key constraint
+            donorId: donorId, // Use existing user ID
             bookTitle: bookName,
             bookAuthor: author,
             bookGenre: category,

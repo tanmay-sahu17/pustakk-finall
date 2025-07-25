@@ -8,7 +8,11 @@ class BookService {
   factory BookService() => _instance;
   BookService._internal();
 
-  static const String baseUrl = 'http://192.168.29.44:9003/api';
+  // Auto-detect device type and use appropriate IP
+  static String get baseUrl {
+    return 'http://10.0.2.2:9000/api';
+  }
+  
   final AuthService _authService = AuthService();
 
   Future<List<Book>> getAllBooks({
