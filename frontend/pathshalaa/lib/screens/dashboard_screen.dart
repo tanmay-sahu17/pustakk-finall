@@ -142,6 +142,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.check_circle,
                     value: '${_donations.where((d) => d['status'] == 'स्वीकृत').length}',
                     label: 'स्वीकृत\nपुस्तकें',
+
                     iconColor: const Color(0xFF4CAF50),
                   ),
                 ),
@@ -165,12 +166,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: _buildStatCard(
                     icon: Icons.group,
                     value: '${_donations.map((d) => d['donor']).toSet().length}',
-                    label: 'कुल दाता',
-                    iconColor: const Color(0xFF9C27B0),
+                      label: 'कुल दाता',
+                      iconColor: const Color(0xFF9C27B0),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
             const SizedBox(height: 24),
 
@@ -319,7 +320,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         double cardWidth = constraints.maxWidth;
         double iconSize = (cardWidth * 0.15).clamp(26.0, 34.0);
         double fontSize = (cardWidth * 0.14).clamp(24.0, 30.0);
-        double labelFontSize = (cardWidth * 23).clamp(12.0, 15.0);
+        double labelFontSize = (cardWidth * 0.13).clamp(16.0, 22.0);
         
         return Container(
           height: 140,

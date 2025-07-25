@@ -1,9 +1,10 @@
 // API Configuration
+import '../config/app_config.dart';
+
 class ApiConstants {
-  // Auto-detect device type and use appropriate IP
+  // Use centralized server URL from AppConfig
   static String get baseUrl {
-    // For emulator, use 10.0.2.2
-    return 'http://10.0.2.2:9000';
+    return AppConfig.serverUrl;
   }
   
   // API endpoints

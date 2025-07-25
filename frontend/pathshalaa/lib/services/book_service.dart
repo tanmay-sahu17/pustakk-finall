@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/book.dart';
 import 'auth_service.dart';
+import '../config/app_config.dart';
 
 class BookService {
   static final BookService _instance = BookService._internal();
   factory BookService() => _instance;
   BookService._internal();
 
-  // Auto-detect device type and use appropriate IP
+  // Use centralized server URL from AppConfig
   static String get baseUrl {
-    return 'http://10.0.2.2:9000/api';
+    return AppConfig.apiBaseUrl;
   }
   
   final AuthService _authService = AuthService();

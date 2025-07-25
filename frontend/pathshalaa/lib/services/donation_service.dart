@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_constants.dart';
+import '../config/app_config.dart';
 
 class DonationService {
   static final DonationService _instance = DonationService._internal();
@@ -18,7 +19,7 @@ class DonationService {
     try {
       // print('Testing API connection to: ${ApiConstants.baseUrl}/api/test');
       final response = await http.get(
-        Uri.parse('${ApiConstants.baseUrl}/api/test'),
+        Uri.parse(AppConfig.testUrl),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 5));
 
@@ -53,7 +54,7 @@ class DonationService {
 
       // print('Fetching donations from: ${ApiConstants.fullDonationsUrl}');
       final response = await http.get(
-        Uri.parse(ApiConstants.fullDonationsUrl),
+        Uri.parse(AppConfig.donationsUrl),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 

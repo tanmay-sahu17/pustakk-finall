@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import '../config/app_config.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -11,9 +12,7 @@ class AuthService {
 
   // Auto-detect device type and use appropriate IP
   static String get baseUrl {
-    // For emulator, use 10.0.2.2
-    // For real device, use computer's IP
-    return 'http://10.0.2.2:9000/api';
+    return AppConfig.apiBaseUrl;
   }
   
   User? _currentUser;
@@ -45,7 +44,7 @@ class AuthService {
       print('API URL: $baseUrl/auth/login');
       
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
+        Uri.parse(AppConfig.authLoginUrl),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
