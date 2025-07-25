@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
             
             // App Name
             const Text(
-              'Pustakalay 2.0',
+              'स्मृति पुस्तकालय',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 32,
