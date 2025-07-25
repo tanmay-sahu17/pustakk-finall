@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/donation_service.dart';
+import '../services/auth_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -104,6 +105,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         automaticallyImplyLeading: false,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: _showLogoutConfirmation,
+            icon: const Icon(Icons.logout),
+            tooltip: 'लॉगआउट',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -631,5 +639,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Refresh the main screen when coming back
       _loadDonations();
     });
+  }
+
+  void _showLogoutConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('लॉगआउट'),
+          content: const Text('क्या आप वाकई लॉगआउट करना चाहते हैं?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('रद्द करें'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _performLogout();
+              },
+              child: const Text('लॉगआउट', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _performLogout() async {
+    try {
+      // Show loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('लॉगआउट हो रहे हैं...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      // Clear auth data from storage using AuthService
+      final authService = AuthService();
+      await authService.clearAuthData();
+      
+      // Navigate to login and clear all previous routes
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
+          (Route<dynamic> route) => false,
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('लॉगआउट में त्रुटि: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

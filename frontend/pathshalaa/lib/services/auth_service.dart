@@ -61,6 +61,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        final userData = data['user'];
         
         // Extract token from cookie header if present, or use session
         String? authToken;
@@ -73,12 +74,12 @@ class AuthService {
         
         _token = authToken ?? 'session_active';
         
-        // Save token to local storage
+        // Save token and user data to local storage
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', _token!);
+        await prefs.setString('current_user', json.encode(userData));
         
         // Create user object from response
-        final userData = data['user'];
         _currentUser = User(
           id: userData['id']?.toString() ?? userData['userId']?.toString() ?? '',
           name: userData['username'] ?? userData['name'] ?? 'User',
@@ -90,7 +91,7 @@ class AuthService {
         );
         
         _isLoggedIn = true;
-        print('API login successful');
+        print('API login successful - Token saved persistently');
         return true;
       } else {
         final error = json.decode(response.body);
@@ -266,6 +267,31 @@ class AuthService {
       return {
         'Content-Type': 'application/json',
       };
+    }
+  }
+
+  // Clear auth data from persistent storage (for logout)
+  Future<void> clearAuthData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      await prefs.remove('current_user');
+      _token = null;
+      _currentUser = null;
+      _isLoggedIn = false;
+    } catch (e) {
+      print('Error clearing auth data: $e');
+    }
+  }
+
+  // Check if user is logged in from stored data
+  Future<bool> isUserLoggedIn() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      return token != null && token.isNotEmpty;
+    } catch (e) {
+      return false;
     }
   }
 }
