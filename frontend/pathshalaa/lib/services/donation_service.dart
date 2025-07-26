@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_constants.dart';
 import '../config/app_config.dart';
+import 'auth_service.dart';
 
 class DonationService {
   static final DonationService _instance = DonationService._internal();
@@ -121,6 +122,73 @@ class DonationService {
     return await fetchDonationsFromAPI();
   }
 
+  // Get donations for specific user
+  Future<List<Map<String, dynamic>>> getDonationsForUser(String userId) async {
+    try {
+      if (!_apiConnected) {
+        await testApiConnection();
+      }
+
+      if (!_apiConnected) {
+        // print('API not connected, filtering local data for user: $userId');
+        return _filterLocalDonationsByUser(userId);
+      }
+
+      // Fetch user-specific donations from API
+      final url = '${AppConfig.donationsUrl}?userId=$userId';
+      // print('Fetching user donations from: $url');
+      
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+
+      // print('API Response Status: ${response.statusCode}');
+      // print('API Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> donations = data['data'];
+          final userDonations = donations.cast<Map<String, dynamic>>();
+          // print('Successfully fetched ${userDonations.length} donations for user $userId');
+          
+          // Sort by ID (newer IDs = more recent) in descending order
+          userDonations.sort((a, b) {
+            final aId = a['id'] ?? 0;
+            final bId = b['id'] ?? 0;
+            return bId.compareTo(aId); // Descending order (newest first)
+          });
+          
+          return userDonations;
+        } else {
+          print('API Error: ${data['message']}');
+          return _filterLocalDonationsByUser(userId);
+        }
+      } else {
+        // print('HTTP Error: ${response.statusCode}');
+        return _filterLocalDonationsByUser(userId);
+      }
+    } catch (e) {
+      print('Error fetching user donations: $e');
+      return _filterLocalDonationsByUser(userId);
+    }
+  }
+
+  // Filter local donations by user (fallback method)
+  List<Map<String, dynamic>> _filterLocalDonationsByUser(String userId) {
+    return _localDonations.where((donation) {
+      final donorName = donation['donor']?.toString().toLowerCase() ?? '';
+      final userIdLower = userId.toLowerCase();
+      
+      // Check if donation belongs to this user
+      return donorName.contains(userIdLower) || 
+             donorName == userIdLower ||
+             donation['userId']?.toString().toLowerCase() == userIdLower ||
+             donation['donorId']?.toString().toLowerCase() == userIdLower;
+    }).toList();
+  }
+
   // Add new donation
   Future<bool> addDonation({
     required String bookName,
@@ -137,6 +205,10 @@ class DonationService {
       }
 
       if (_apiConnected) {
+        // Get current user ID
+        final authService = AuthService();
+        final currentUserId = await authService.getCurrentUserId();
+        
         final response = await http.post(
           Uri.parse(ApiConstants.fullDonationsUrl),
           headers: {'Content-Type': 'application/json'},
@@ -147,6 +219,7 @@ class DonationService {
             'category': category,
             'condition': condition,
             'description': description,
+            'userId': currentUserId, // Add current user ID
           }),
         ).timeout(const Duration(seconds: 10));
 

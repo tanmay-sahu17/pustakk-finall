@@ -32,13 +32,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Initialize donation service first
       await _donationService.initialize();
       
+      // Get current user information
+      final authService = AuthService();
+      final currentUserId = await authService.getCurrentUserId();
+      
+      if (currentUserId == null) {
+        // If no user is logged in, redirect to login
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+        return;
+      }
+      
       // Test API connection
       final apiConnected = await _donationService.testApiConnection();
       // print('🔍 Dashboard: API Connection result: $apiConnected');
       
-      // Load donations from API
-      final donations = await _donationService.getDonationsAsync();
-      // print('🔍 Dashboard: Received ${donations.length} donations from service');
+      // Load donations for current user only
+      final donations = await _donationService.getDonationsForUser(currentUserId);
+      // print('🔍 Dashboard: Received ${donations.length} donations for user $currentUserId');
       // print('🔍 Dashboard: Donations data: $donations');
       
       if (mounted) {

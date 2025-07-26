@@ -1,7 +1,8 @@
 class AppConfig {
   // Server URL Configuration
-  static const String serverUrl = 'http://10.0.2.2:9000'; // For emulator
+  // static const String serverUrl = 'http://10.0.2.2:9000'; // For emulator
   // static const String serverUrl = 'http://192.168.29.44:9000'; // For real device
+  static const String serverUrl = 'http://165.22.208.6:5010'; // Production server
   // static const String serverUrl = 'http://localhost:9000'; // For web/desktop
   
   // API Base URL

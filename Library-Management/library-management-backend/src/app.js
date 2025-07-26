@@ -26,11 +26,15 @@ app.use(cors({
         'http://localhost:3001',
         'http://10.0.2.2:9005',
         'http://10.0.2.2:8080',
+        'http://165.22.208.6:5010',  // Production server
+        'http://165.22.208.6',       // Production server without port
+        'https://165.22.208.6:5010', // HTTPS version
+        'https://165.22.208.6',      // HTTPS version without port
         '*' // Allow all origins for development
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false // Set to false for broader compatibility
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    credentials: true // Enable credentials for production
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

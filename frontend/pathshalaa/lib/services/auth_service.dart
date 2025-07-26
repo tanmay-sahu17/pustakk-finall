@@ -293,4 +293,26 @@ class AuthService {
       return false;
     }
   }
+
+  // Get current user data from storage
+  Future<Map<String, dynamic>?> getCurrentUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userDataString = prefs.getString('current_user');
+      
+      if (userDataString != null) {
+        return json.decode(userDataString);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting current user data: $e');
+      return null;
+    }
+  }
+
+  // Get current user ID/username
+  Future<String?> getCurrentUserId() async {
+    final userData = await getCurrentUserData();
+    return userData?['userId'] ?? userData?['username'] ?? userData?['id']?.toString();
+  }
 }
