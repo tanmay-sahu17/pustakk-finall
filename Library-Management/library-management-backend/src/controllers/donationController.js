@@ -4,7 +4,31 @@ const { Op } = require('sequelize');
 // Get all donations
 const getAllDonations = async (req, res) => {
     try {
+        const { userId } = req.query; // Get userId from query parameters
+        
+        let whereClause = {};
+        
+        // If userId is provided, filter by user
+        if (userId) {
+            // First try to find the user to get their integer ID
+            const User = require('../models/User');
+            const user = await User.findOne({ where: { userId: userId } });
+            
+            if (user) {
+                // Filter by the actual integer donorId
+                whereClause = { donorId: user.id };
+            } else {
+                // If user not found, also check description field for legacy data
+                whereClause = {
+                    [Op.or]: [
+                        { bookDescription: { [Op.like]: `%${userId}%` } }
+                    ]
+                };
+            }
+        }
+        
         const donations = await Donation.findAll({
+            where: whereClause,
             order: [['createdAt', 'DESC']]
         });
 
@@ -22,7 +46,8 @@ const getAllDonations = async (req, res) => {
                    donation.status === 'APPROVED' ? 'स्वीकृत' : 
                    donation.status === 'REJECTED' ? 'अस्वीकृत' : 'समीक्षा में',
             condition: donation.bookCondition,
-            description: donation.bookDescription
+            description: donation.bookDescription,
+            donorId: donation.donorId
         }));
 
         res.status(200).json({
@@ -91,7 +116,8 @@ const createDonation = async (req, res) => {
             donorName,
             category,
             condition = 'Good',
-            description
+            description,
+            userId
         } = req.body;
 
         // Validate required fields
@@ -105,18 +131,32 @@ const createDonation = async (req, res) => {
         // Generate donation ID
         const donationId = `DON-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
-        // Use a default donor ID from existing users (assuming user with ID 3 exists)
-        // In a real app, this would come from authenticated user session
-        const donorId = 3; // Using known user ID
+        // Try to find the user by userId to get the actual user ID (integer)
+        let actualDonorId = null;
+        if (userId) {
+            try {
+                const User = require('../models/User');
+                console.log('Looking for user with userId:', userId);
+                const user = await User.findOne({ where: { userId: userId } });
+                console.log('Found user:', user ? user.dataValues : 'null');
+                if (user) {
+                    actualDonorId = user.id; // Use the integer ID from users table
+                    console.log('Using actualDonorId:', actualDonorId);
+                }
+            } catch (userError) {
+                console.log('Error finding user:', userError.message);
+                console.log('Could not find user:', userId);
+            }
+        }
 
         const newDonation = await Donation.create({
             donationId,
-            donorId: donorId, // Use existing user ID
+            donorId: actualDonorId, // Use actual integer ID or null
             bookTitle: bookName,
             bookAuthor: author,
             bookGenre: category,
             bookCondition: condition,
-            bookDescription: description || `Donor: ${donorName}`,
+            bookDescription: description || `Donor: ${donorName}${userId ? `, UserId: ${userId}` : ''}`,
             status: 'PENDING',
             submissionDate: new Date()
         });
@@ -130,7 +170,9 @@ const createDonation = async (req, res) => {
             category: newDonation.bookGenre,
             status: 'समीक्षा में',
             condition: newDonation.bookCondition,
-            description: newDonation.bookDescription
+            description: newDonation.bookDescription,
+            donorId: newDonation.donorId,
+            userId: userId // Keep track of the original userId
         };
 
         res.status(201).json({
