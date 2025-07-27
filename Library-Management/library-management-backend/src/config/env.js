@@ -3,13 +3,13 @@ require('dotenv').config();
 
 // Export environment variables with fallbacks for safety
 module.exports = {
-    PORT: process.env.PORT || 5000,
+    PORT: process.env.PORT || 5010,
     
     // MySQL Database Configuration
     DB_NAME: process.env.DB_NAME || 'library_management',
-    DB_USER: process.env.DB_USER || 'root',
-    DB_PASSWORD: process.env.DB_PASSWORD || '',
-    DB_HOST: process.env.DB_HOST || 'localhost',
+    DB_USER: process.env.DB_USER || 'library_user',
+    DB_PASSWORD: process.env.DB_PASSWORD || 'library_password',
+    DB_HOST: process.env.DB_HOST || '165.22.208.62',
     DB_PORT: process.env.DB_PORT || 3306,
     
     // Legacy MongoDB (keep for compatibility)

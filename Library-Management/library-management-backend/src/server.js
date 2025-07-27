@@ -50,7 +50,11 @@ const findAvailablePort = (startPort, callback) => {
 
 // Try to start the server on an available port
 const preferredPort = process.env.PORT || 5010;
-const serverHost = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+let serverHost = '0.0.0.0'; // Default value
+
+if (process.env.NODE_ENV === 'production') {
+  serverHost = '165.22.208.62';
+}
 console.log(`Starting server on port ${preferredPort}...`);
 
 findAvailablePort(preferredPort, (err, availablePort) => {
@@ -60,12 +64,13 @@ findAvailablePort(preferredPort, (err, availablePort) => {
     }
     
     const server = app.listen(availablePort, serverHost, () => {
+        
         const serverUrl = process.env.NODE_ENV === 'production' 
-            ? `http://165.22.208.6:${availablePort}` 
-            : `http://localhost:${availablePort}`;
+            ? `http://165.22.208.62:${availablePort}` 
+            : `http://165.22.208.62:${availablePort}`;
         console.log(`🚀 Server running on ${serverUrl}`);
         console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-        console.log(`🗄️  Database: ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 3306}`);
+        console.log(`🗄️  Database: ${process.env.DB_HOST || ''}:${process.env.DB_PORT || 3306}`);
     });
     
     // Handle server errors

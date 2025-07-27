@@ -3,17 +3,18 @@ const authController = require('../controllers/authController');
 const userAuth = require('../middlewares/userAuth');
 
 const router = express.Router();
-// rgister 
+
+// User registration route
 router.post('/register', authController.register);
 
 // User login route
 router.post('/login', authController.login);
 
 // User logout route
-router.post('/logout',  authController.logout);
+router.post('/logout', authController.logout);
 
+// Admin registration route
 router.post('/admin/register', authController.adminRegister);
-
 
 // Admin login route
 router.post('/admin/login', authController.adminLogin);

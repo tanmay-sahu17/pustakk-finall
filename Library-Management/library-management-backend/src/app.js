@@ -1,15 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const adminRoutes = require('./routes/adminRoutes');
-const adminBookRoutes = require('./routes/adminBookRoutes');
 const authRoutes = require('./routes/authRoutes');
-const bookRoutes = require('./routes/bookRoutes');
-const certificateRoutes = require('./routes/certificateRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
-const employeeRoutes = require('./routes/employeeRoutes');
-const donationRoutes = require('./routes/donationRoutes');
-const errorHandler = require('./middlewares/errorHandler');
 const env = require('./config/env');
 
 // Initialize Express app
@@ -18,18 +10,19 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: [
-        'http://localhost:3000', 
+        // 'http://localhost:3000', 
         'http://127.0.0.1:3000', 
-        'http://localhost:8080',
-        'http://localhost:8000',
-        'http://localhost:9000',
+        // 'http://localhost:8080',
+        // 'http://localhost:8000',
+        // 'http://localhost:9000',
+        'http://127.0.0.1:3306',
         'http://localhost:3001',
         'http://10.0.2.2:9005',
         'http://10.0.2.2:8080',
-        'http://165.22.208.6:5010',  // Production server
-        'http://165.22.208.6',       // Production server without port
-        'https://165.22.208.6:5010', // HTTPS version
-        'https://165.22.208.6',      // HTTPS version without port
+        'http://165.22.208.62:5010',  // Production server
+        'http://165.22.208.62',       // Production server without port
+        'https://165.22.208.62:5010', // HTTPS version
+        'https://165.22.208.62',      // HTTPS version without port
         '*' // Allow all origins for development
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -44,13 +37,11 @@ app.get('/api/test', (req, res) => {
     res.json({ message: 'API is working', timestamp: new Date().toISOString() });
 });
 
-// Database connection
+// Database connection (disabled for testing)
+console.log('Connecting to MySQL...');
+/*
 const { connectDB } = require('./config/database');
-
-// Check if we should use in-memory DB (for development/testing) or real MySQL
 const useInMemoryDb = env.USE_MEMORY_DB;
-
-// Connect to database asynchronously (don't block app startup)
 if (useInMemoryDb) {
     console.log('Using in-memory database for development/testing...');
     const dbConfig = require('./config/in-memory-db');
@@ -58,7 +49,6 @@ if (useInMemoryDb) {
         .then(() => console.log('In-memory database connected successfully'))
         .catch(err => console.error('In-memory database connection error:', err));
 } else {
-    // Connect to MySQL database without blocking
     connectDB()
         .then(() => console.log('MySQL database connection and sync completed'))
         .catch(err => {
@@ -70,6 +60,7 @@ if (useInMemoryDb) {
             console.log('4. Set USE_MEMORY_DB=true in your .env to use in-memory database');
         });
 }
+*/
 
 // Simple test route
 app.get('/api/test', (req, res) => {
@@ -81,20 +72,16 @@ app.get('/api/test', (req, res) => {
 });
 
 // Routes
-app.use('/api/admin', adminRoutes);
-app.use('/api/admin/books', adminBookRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/books', bookRoutes);
-app.use('/api/certificates', certificateRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/employees', employeeRoutes);
-app.use('/api/donations', donationRoutes);
 
 // Serve static files
 app.use('/uploads', express.static('uploads'));
 
-// Error handling middleware
-app.use(errorHandler);
+// Simple error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
+});
 
 // Export the app
 module.exports = app;

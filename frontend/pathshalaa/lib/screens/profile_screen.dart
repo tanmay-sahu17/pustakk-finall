@@ -11,6 +11,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController(text: 'John Doe');
   final _emailController = TextEditingController(text: 'john.doe@example.com');
   final _phoneController = TextEditingController(text: '+1 234 567 8900');
+
   bool _isEditing = false;
 
   @override
@@ -33,12 +34,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               setState(() {
                 _isEditing = !_isEditing;
               });
+
               if (!_isEditing) {
-                // Save changes
+                // TODO: API call to save updated user info
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Profile updated successfully!'),
-                  ),
+                  const SnackBar(content: Text('Profile updated successfully!')),
                 );
               }
             },
@@ -49,7 +49,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Profile Picture Section
             const SizedBox(height: 20),
             Stack(
               children: [
@@ -77,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: IconButton(
                         icon: const Icon(Icons.camera_alt, color: Colors.white),
                         onPressed: () {
-                          // Handle image picker
+                          // TODO: Image picker
                         },
                       ),
                     ),
@@ -89,39 +88,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Profile Information
             Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Personal Information',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    const Text('Personal Information',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
-                    _buildProfileField(
-                      'Full Name',
-                      _nameController,
-                      Icons.person_outline,
-                    ),
+                    _buildProfileField('Full Name', _nameController, Icons.person_outline),
                     const SizedBox(height: 16),
-                    _buildProfileField(
-                      'Email',
-                      _emailController,
-                      Icons.email_outlined,
-                    ),
+                    _buildProfileField('Email', _emailController, Icons.email_outlined),
                     const SizedBox(height: 16),
-                    _buildProfileField(
-                      'Phone',
-                      _phoneController,
-                      Icons.phone_outlined,
-                    ),
+                    _buildProfileField('Phone', _phoneController, Icons.phone_outlined),
                   ],
                 ),
               ),
@@ -129,34 +109,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 20),
 
-            // Statistics Card
+            // Library Statistics
             Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Library Statistics',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    const Text('Library Statistics',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildStatItem('Books Borrowed', '23', Icons.bookmark),
-                        _buildStatItem(
-                          'Currently Reading',
-                          '3',
-                          Icons.menu_book,
-                        ),
+                        _buildStatItem('Currently Reading', '3', Icons.menu_book),
                         _buildStatItem('Returned', '20', Icons.check_circle),
                       ],
                     ),
@@ -167,12 +136,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 20),
 
-            // Settings and Actions
+            // Actions
             Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Column(
                 children: [
                   ListTile(
@@ -180,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: const Text('Borrowing History'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Navigate to history
+                      // TODO: Navigate to Borrowing History
                     },
                   ),
                   const Divider(height: 1),
@@ -189,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: const Text('Favorite Books'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Navigate to favorites
+                      // TODO: Navigate to Favorites
                     },
                   ),
                   const Divider(height: 1),
@@ -198,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: const Text('Notifications'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Navigate to notifications settings
+                      // TODO: Notifications
                     },
                   ),
                   const Divider(height: 1),
@@ -207,16 +174,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: const Text('Help & Support'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Navigate to help
+                      // TODO: Help
                     },
                   ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
-                      'Logout',
-                      style: TextStyle(color: Colors.red),
-                    ),
+                    title: const Text('Logout',
+                        style: TextStyle(color: Colors.red)),
                     onTap: () {
                       _showLogoutDialog();
                     },
@@ -264,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF3F51B5).withValues(alpha: 0.1),
+            color: const Color(0xFF3F51B5).withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: const Color(0xFF3F51B5), size: 24),
@@ -292,9 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           content: const Text('Are you sure you want to logout?'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
             ElevatedButton(

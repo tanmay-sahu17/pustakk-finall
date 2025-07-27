@@ -6,7 +6,7 @@ The server URL is centralized in the `lib/config/app_config.dart` file. To chang
 
 ### For Android Emulator:
 ```dart
-static const String serverUrl = 'http://165.22.208.6:5010';
+static const String serverUrl = 'http://165.22.208.62:5010';
 ```
 
 ### For Real Android Device (on same network):

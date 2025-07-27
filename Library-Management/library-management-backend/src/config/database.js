@@ -7,7 +7,7 @@ const sequelize = new Sequelize(
     env.DB_USER || 'root',                // username  
     env.DB_PASSWORD || '',                // password
     {
-        host: env.DB_HOST || 'localhost',
+        host: env.DB_HOST || '',
         port: env.DB_PORT || 3306,
         dialect: 'mysql',
         logging: false, // Disable SQL logging for faster startup

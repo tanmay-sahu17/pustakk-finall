@@ -9,7 +9,7 @@ class DonationService {
   factory DonationService() => _instance;
   DonationService._internal();
 
-  static final String baseUrl = AppConfig.apiBaseUrl + '/';
+  static final String baseUrl = '${AppConfig.apiBaseUrl}/';
   final AuthService _authService = AuthService();
 
   // Add the missing _donations list

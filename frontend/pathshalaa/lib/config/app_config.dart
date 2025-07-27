@@ -22,7 +22,7 @@ class AppConfig {
   static const String certificatesUrl = '$apiBaseUrl/certificates';
   
   // App Configuration
-  static const String appName = 'Pustakalay 2.0';
+  static const String appName = 'Pustakalay ';
   static const String appVersion = '1.0.0';
   
   // Network Timeouts
