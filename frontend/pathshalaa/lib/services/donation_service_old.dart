@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'auth_service.dart';
+import '../config/app_config.dart';
 
 class DonationService {
   static final DonationService _instance = DonationService._internal();
   factory DonationService() => _instance;
   DonationService._internal();
 
-  static const String baseUrl = 'http://localhost:9001/api';
+  static final String baseUrl = AppConfig.apiBaseUrl + '/';
   final AuthService _authService = AuthService();
 
   // Add the missing _donations list

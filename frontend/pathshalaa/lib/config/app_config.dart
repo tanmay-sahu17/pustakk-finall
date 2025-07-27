@@ -1,17 +1,25 @@
 class AppConfig {
-  // Server URL Configuration
-  // static const String serverUrl = 'http://10.0.2.2:9000'; // For emulator
-  // static const String serverUrl = 'http://192.168.29.44:9000'; // For real device
-  static const String serverUrl = 'http://165.22.208.6:5010'; // Production server
-  // static const String serverUrl = 'http://localhost:9000'; // For web/desktop
+  // Base Server URL - Single source of truth
+  static const String baseServerUrl = 'http://165.22.208.62:5010';
   
-  // API Base URL
-  static const String apiBaseUrl = '$serverUrl/api';
+  // Derived URLs from base URL
+  static const String serverUrl = baseServerUrl; // For backward compatibility
+  static const String apiBaseUrl = '$baseServerUrl/api';
   
-  // API Endpoints
+  // Authentication Endpoints
   static const String authLoginUrl = '$apiBaseUrl/auth/login';
+  static const String authRegisterUrl = '$apiBaseUrl/auth/register';
+  static const String authLogoutUrl = '$apiBaseUrl/auth/logout';
+  static const String adminLoginUrl = '$apiBaseUrl/auth/admin/login';
+  static const String adminRegisterUrl = '$apiBaseUrl/auth/admin/register';
+  
+  // Other API Endpoints
+  static const String booksUrl = '$apiBaseUrl/books';
   static const String donationsUrl = '$apiBaseUrl/donations';
   static const String testUrl = '$apiBaseUrl/test';
+  static const String employeesUrl = '$apiBaseUrl/employees';
+  static const String transactionsUrl = '$apiBaseUrl/transactions';
+  static const String certificatesUrl = '$apiBaseUrl/certificates';
   
   // App Configuration
   static const String appName = 'Pustakalay 2.0';
