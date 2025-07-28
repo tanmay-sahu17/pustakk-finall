@@ -1,6 +1,6 @@
 ﻿const jwt = require('jsonwebtoken');
 const env = require('../config/env');
-const mysql = require('mysql2/promise');
+const User = require('../models/UserModel');
 
 // Database connection config
 const dbConfig = {
