@@ -51,7 +51,7 @@ class AuthService {
         },
         body: jsonEncode({
           'username': userId,   // Send as username to match backend expectation
-          'userId': userId,     // Also send as userId for compatibility
+          'id': userId,         // Also send as id for database id field compatibility
           'password': password,
         }),
       ).timeout(

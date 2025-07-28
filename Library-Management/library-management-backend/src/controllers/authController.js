@@ -5,20 +5,27 @@ const User = require('../models/User');
 // Login function
 exports.login = async (req, res) => {
     try {
-        const { username, userId, password } = req.body;
-        const loginIdentifier = userId || username; // Use userId first, then username
+        const { username, id, password } = req.body;
+        const loginIdentifier = id || username; // Accept both id and username from frontend
         
-        console.log('Login attempt:', { username, userId, loginIdentifier, password });
+        console.log('Login attempt:', { username, id, loginIdentifier, password });
         
         if (!loginIdentifier || !password) {
             return res.status(400).json({ 
                 success: false,
-                message: 'Username/UserID and password are required' 
+                message: 'Username/ID and password are required' 
             });
         }
         
-        // Find user using Sequelize model
-        const user = await User.findByLogin(loginIdentifier);
+        // Find user by username OR by id (database has id field)
+        let user;
+        if (loginIdentifier && !isNaN(loginIdentifier)) {
+            // If loginIdentifier is a number, search by id
+            user = await User.findOne({ where: { id: parseInt(loginIdentifier) } });
+        } else {
+            // Otherwise search by username
+            user = await User.findByLogin(loginIdentifier);
+        }
         
         if (!user) {
             return res.status(401).json({ 

@@ -8,12 +8,12 @@ curl -X POST "http://165.22.208.62:5010/api/auth/login" ^
 
 echo.
 echo.
-echo Testing with userId parameter...
+echo Testing with id parameter...
 echo.
 
 curl -X POST "http://165.22.208.62:5010/api/auth/login" ^
   -H "Content-Type: application/json" ^
-  -d "{\"userId\":\"simple\",\"password\":\"test123\"}"
+  -d "{\"id\":\"simple\",\"password\":\"test123\"}"
 
 echo.
 echo Done.
