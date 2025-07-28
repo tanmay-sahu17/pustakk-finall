@@ -17,24 +17,31 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: [
-        // 'http://localhost:3000', 
+        // Development URLs
+        'http://localhost:3000', 
         'http://127.0.0.1:3000', 
-        // 'http://localhost:8080',
-        // 'http://localhost:8000',
-        // 'http://localhost:9000',
+        'http://localhost:8080',
+        'http://localhost:8000',
+        'http://localhost:9000',
         'http://127.0.0.1:3306',
         'http://localhost:3001',
-        'http://10.0.2.2:9005',
-        'http://10.0.2.2:8080',
+        
+        // Mobile/Flutter URLs
+        'http://10.0.2.2:9005',    // Android emulator
+        'http://10.0.2.2:8080',    // Android emulator
+        'http://10.0.2.2:5010',    // Android emulator to backend
+        'http://localhost:5010',   // Local backend
+        
+        // Production URLs
         'http://165.22.208.62:5010',  // Production server
         'http://165.22.208.62',       // Production server without port
         'https://165.22.208.62:5010', // HTTPS version
-        'https://165.22.208.62',      // HTTPS version without port
-        '*' // Allow all origins for development
+        'https://165.22.208.62'       // HTTPS without port
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    credentials: true // Enable credentials for production
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    optionsSuccessStatus: 200
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
