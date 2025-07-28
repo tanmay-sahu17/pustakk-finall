@@ -2,6 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
+const donationRoutes = require('./routes/donationRoutes');
+// Other routes commented out until controllers are created
+// const bookRoutes = require('./routes/bookRoutes');
+// const adminRoutes = require('./routes/adminRoutes');
+// const employeeRoutes = require('./routes/employeeRoutes');
+// const certificateRoutes = require('./routes/certificateRoutes');
+// const transactionRoutes = require('./routes/transactionRoutes');
 const env = require('./config/env');
 
 // Initialize Express app
@@ -73,6 +80,13 @@ app.get('/api/test', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/donations', donationRoutes);
+// Other routes will be added after controllers are created
+// app.use('/api/books', bookRoutes);
+// app.use('/api/admin', adminRoutes);
+// app.use('/api/employees', employeeRoutes);
+// app.use('/api/certificates', certificateRoutes);
+// app.use('/api/transactions', transactionRoutes);
 
 // Serve static files
 app.use('/uploads', express.static('uploads'));

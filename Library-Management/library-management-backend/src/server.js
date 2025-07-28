@@ -50,12 +50,11 @@ const findAvailablePort = (startPort, callback) => {
 
 // Try to start the server on an available port
 const preferredPort = process.env.PORT || 5010;
-let serverHost = '0.0.0.0'; // Default value
+let serverHost = '0.0.0.0'; // Bind to all local interfaces (this is correct for local development)
 
-if (process.env.NODE_ENV === 'production') {
-  serverHost = '165.22.208.62';
-}
-console.log(`Starting server on port ${preferredPort}...`);
+console.log(`Starting server on ${serverHost}:${preferredPort}...`);
+console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`⚠️  Note: Server will bind to local machine, accessible via network`);
 
 findAvailablePort(preferredPort, (err, availablePort) => {
     if (err) {
@@ -64,11 +63,10 @@ findAvailablePort(preferredPort, (err, availablePort) => {
     }
     
     const server = app.listen(availablePort, serverHost, () => {
-        
-        const serverUrl = process.env.NODE_ENV === 'production' 
-            ? `http://165.22.208.62:${availablePort}` 
-            : `http://165.22.208.62:${availablePort}`;
+        const serverUrl = `http://localhost:${availablePort}`;
+        const externalUrl = `http://165.22.208.62:${availablePort}`;
         console.log(`🚀 Server running on ${serverUrl}`);
+        console.log(`🌐 External URL (after deployment): ${externalUrl}`);
         console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log(`🗄️  Database: ${process.env.DB_HOST || ''}:${process.env.DB_PORT || 3306}`);
     });

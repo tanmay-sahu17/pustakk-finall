@@ -14,10 +14,12 @@
       "env_production": {
         "NODE_ENV": "production",
         "PORT": "5010",
-        "DB_HOST": "localhost",
+        "DB_HOST": "165.22.208.62",
         "DB_USER": "root",
         "DB_PASSWORD": "Ssipmt@2025DODB",
-        "DB_NAME": "library_management"
+        "DB_NAME": "library_management",
+        "DB_PORT": "3306",
+        "JWT_SECRET": "jvbndflbjdlfbndlnbldkfnbdfklnkmfbndlf"
       },
       "log_date_format": "YYYY-MM-DD HH:mm Z",
       "error_file": "./logs/err.log",
