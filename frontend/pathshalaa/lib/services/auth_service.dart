@@ -41,7 +41,7 @@ class AuthService {
   Future<bool> login(String userId, String password) async {
     try {
       print('Attempting login with userId: $userId');
-      print('API URL: $baseUrl/auth/login');
+      print('API URL: ${AppConfig.authLoginUrl}');
       
       final response = await http.post(
         Uri.parse(AppConfig.authLoginUrl),
@@ -49,10 +49,16 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'userId': userId,
+        body: jsonEncode({
+          'username': userId,   // Send as username to match backend expectation
+          'userId': userId,     // Also send as userId for compatibility
           'password': password,
         }),
+      ).timeout(
+        Duration(seconds: 30), // Increased timeout
+        onTimeout: () {
+          throw Exception('Connection timeout. Please check your internet connection.');
+        },
       );
 
       print('Login response status: ${response.statusCode}');
@@ -60,38 +66,34 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        
+        // Backend sends token directly in response
+        _token = data['token'];
         final userData = data['user'];
         
-        // Extract token from cookie header if present, or use session
-        String? authToken;
-        final cookies = response.headers['set-cookie'];
-        if (cookies != null && cookies.contains('token=')) {
-          final tokenStart = cookies.indexOf('token=') + 6;
-          final tokenEnd = cookies.indexOf(';', tokenStart);
-          authToken = cookies.substring(tokenStart, tokenEnd == -1 ? cookies.length : tokenEnd);
+        if (_token != null && userData != null) {
+          // Save token and user data to local storage
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', _token!);
+          await prefs.setString('current_user', json.encode(userData));
+          
+          // Create user object from response
+          _currentUser = User(
+            id: userData['id']?.toString() ?? userData['userId']?.toString() ?? '',
+            name: userData['username'] ?? userData['name'] ?? 'User',
+            email: userData['email'] ?? '',
+            phone: userData['phone'] ?? '',
+            role: UserRole.member,
+            createdAt: DateTime.now(),
+            borrowedBookIds: userData['borrowedBooks'] ?? [],
+          );
+          
+          _isLoggedIn = true;
+          print('API login successful - Token saved persistently');
+          return true;
+        } else {
+          throw Exception('Invalid response format');
         }
-        
-        _token = authToken ?? 'session_active';
-        
-        // Save token and user data to local storage
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', _token!);
-        await prefs.setString('current_user', json.encode(userData));
-        
-        // Create user object from response
-        _currentUser = User(
-          id: userData['id']?.toString() ?? userData['userId']?.toString() ?? '',
-          name: userData['username'] ?? userData['name'] ?? 'User',
-          email: userData['email'] ?? '',
-          phone: userData['phone'] ?? '',
-          role: UserRole.member,
-          createdAt: DateTime.now(),
-          borrowedBookIds: userData['borrowedBooks'] ?? [],
-        );
-        
-        _isLoggedIn = true;
-        print('API login successful - Token saved persistently');
-        return true;
       } else {
         final error = json.decode(response.body);
         print('Login failed: ${error['message']}');

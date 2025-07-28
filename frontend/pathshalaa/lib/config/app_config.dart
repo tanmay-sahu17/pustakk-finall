@@ -1,13 +1,18 @@
 class AppConfig {
-  // Base Server URL - Single source of truth
-  static const String baseServerUrl = 'http://165.22.208.62:5010';
+  // Base Server URL with fallback
+  static const String primaryServerUrl = 'http://165.22.208.62:5010';
+  static const String fallbackServerUrl = 'http://127.0.0.1:5010';
+  static const String localServerUrl = 'http://10.0.2.2:5010'; // For Android emulator
+  
+  // Current active server URL
+  static const String baseServerUrl = primaryServerUrl;
   
   // Derived URLs from base URL
   static const String serverUrl = baseServerUrl; // For backward compatibility
   static const String apiBaseUrl = '$baseServerUrl/api';
   
   // Authentication Endpoints
-  static const String authLoginUrl = '$apiBaseUrl/auth/login';
+  static const String authLoginUrl = '$apiBaseUrl/auth/login';    // Back to original
   static const String authRegisterUrl = '$apiBaseUrl/auth/register';
   static const String authLogoutUrl = '$apiBaseUrl/auth/logout';
   static const String adminLoginUrl = '$apiBaseUrl/auth/admin/login';
